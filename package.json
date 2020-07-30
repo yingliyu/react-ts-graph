@@ -8,14 +8,16 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
+    "@types/d3": "^5.7.2",
     "@types/loadable__component": "^5.13.0",
     "@types/node": "^12.0.0",
     "@types/react": "^16.9.0",
     "@types/react-dom": "^16.9.0",
     "@types/react-router-dom": "^5.1.5",
-    "antd": "^4.5.0",
+    "antd": "3.26.18",
     "craco-less": "^1.17.0",
     "customize-cra": "^1.0.0",
+    "d3": "^5.16.0",
     "react": "^16.13.1",
     "react-app-rewired": "^2.1.6",
     "react-dom": "^16.13.1",
@@ -40,17 +42,18 @@
     "production": [
       ">0.2%",
       "not dead",
-      "not op_mini all"
+      "not op_mini all",
+      "ie > 9"
     ],
     "development": [
       "last 1 chrome version",
       "last 1 firefox version",
-      "last 1 safari version"
+      "last 1 safari version",
+      "ie > 9"
     ]
   },
   "devDependencies": {
-    "babel-plugin-import": "^1.13.0",
-    "css-modules-typescript-loader": "^4.0.0",
-    "react-app-rewire-typings-for-css-module": "^3.0.0"
+    "@babel/preset-env": "^7.10.4",
+    "babel-plugin-import": "^1.13.0"
   }
 }

@@ -16,8 +16,6 @@
     "jsx": "react",
     "outDir": "./dist",
     "sourceMap": true
-    // "baseUrl": ".",
-    // "typeRoots": ["./types", "./node_modules/less/types"]
   },
   "include": ["src"]
 }
