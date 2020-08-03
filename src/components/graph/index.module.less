@@ -1,0 +1,17 @@
+.graph-wrapper {
+  background: rgba(0, 0, 0, 0.4);
+  .fulltext {
+    display: none;
+    span {
+      background: #ccc;
+    }
+  }
+  .text-wrapper {
+    cursor: pointer;
+    &:hover {
+      .fulltext span {
+        display: block;
+      }
+    }
+  }
+}
