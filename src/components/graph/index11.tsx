@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import css from './index.module.less';
-import './style.less';
+import './style-fore.less';
 import graphData from './data';
 import * as d3 from 'd3';
 
@@ -43,7 +43,7 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
     svgH: 900,
     colorList: ['#967adc', '#8cc152', '#3bafda', '#f6bb42', '#37bc9b', '#ff7e90', '#ff7043'],
     rediusList: [100, 80, 60, 50, 40, 30],
-    fontSizeList: [22, 18, 16, 14, 13, 12],
+    fontSizeList: [22, 20, 18, 16, 14, 12],
   };
   let simulation;
   const initSvg = (): void => {
@@ -108,18 +108,10 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
         .attr('x2', ({ target }) => (target as INode).x || 0)
         .attr('y2', ({ target }) => (target as INode).y || 0);
       nodes.attr('transform', data => `translate(${data.x}, ${data.y})`);
-      edgepaths.attr(
-        'd',
-        ({ target, source }) =>
-          'M ' +
-          (source as INode).x +
-          ' ' +
-          (source as INode).y +
-          ' L ' +
-          (source as INode).x +
-          ' ' +
-          (source as INode).y,
-      );
+      // linkTagsSelection.attr(
+      //   'd',
+      //   d => 'M ' + d.source.x + ' ' + d.source.y + ' L ' + d.target.x + ' ' + d.target.y,
+      // );
     });
 
     // 手动调用 tick 使布局达到稳定状态
@@ -136,15 +128,15 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
     const edges = d3
       .select('svg g')
       .append('g')
-      .attr('class', 'lines')
+      .attr('class', 'edges')
       .selectAll('line')
       .data(linksData)
       .enter()
       .append('line')
       .attr('class', 'edge')
       .attr('stroke', '#ccc')
-      .attr('stroke-width', '2px');
-    // .style('display', 'none');
+      .attr('stroke-width', '2px')
+      .style('display', 'none');
 
     // 绘制实体节点
     const nodes = d3
@@ -156,21 +148,18 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
       .enter()
       .append('g')
       .attr('class', 'node')
+      .attr('style', data => {
+        console.log(data);
+        return `cursor: pointer;`;
+      })
       .attr('name', data => {
         // console.log(data);
         return data.name;
       })
-      .call(d3.drag().on('start', started).on('drag', dragged).on('end', ended))
-      .on('click', d => {
-        clickNodeHandle(d);
-      });
-
-    nodes
-      .append('title')
-      .attr('style', 'fill: red; stroke: cadetblue;')
-      .text(data => {
-        return data.name;
-      });
+      .call(d3.drag().on('start', started).on('drag', dragged).on('end', ended));
+    // .on('click', d => {
+    //   // this.clickNodeHandle(d);
+    // });
 
     nodes
       .append('circle')
@@ -180,115 +169,48 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
       .attr('style', 'cursor: pointer;');
 
     nodes
-      .append('text')
-      .attr('class', 'node-text')
-      .attr('width', '300px')
-      .attr('fill', '#fff')
+      .append('foreignObject')
+      .attr('class', 'foreign-text')
+      .attr('width', ({ level }) => 2 * svgData.rediusList[level])
+      .attr('height', ({ level }) => 2 * svgData.rediusList[level])
+      .attr(
+        'transform',
+        ({ level }) => `translate(${-svgData.rediusList[level]}, ${-svgData.rediusList[level]})`,
+      )
+      .append('xhtml:div')
+      .attr('class', 'text-wrapper')
+      .append('span')
       .attr('style', ({ level }) => {
-        return `cursor: pointer;text-anchor: middle;dominant-baseline: middle;font-size:${
-          svgData.fontSizeList[level - 1]
+        return `display:inline-block;height:${2 * svgData.rediusList[level]}px;line-height:${
+          2 * svgData.rediusList[level]
         }px`;
       })
-
-      .append('tspan')
-      .selectAll('tspan')
-      .data((d: INode) => {
-        if (d.name) {
-          if (d.name.includes('.')) {
-            return d.name.split('.');
-          } else {
-            return d.name.split(' ');
-          }
-        }
-      })
-      .join('tspan')
-      .attr('fill', '#f1f1f1')
-      .attr('x', 0)
-      .attr('y', (name, i, nodes) => {
-        if (nodes.length === 1) {
-          return 0;
-        } else if (nodes.length === 2) {
-          if (i === 0) {
-            return '-0.5em';
-          } else if (i === 1) {
-            return '0.5em';
-          }
-        } else if (nodes.length === 3) {
-          if (i === 0) {
-            return '-0.8em';
-          } else if (i === 1) {
-            return '0.3em';
-          } else if (i === 2) {
-            return '1.2em';
-          }
-        }
-      })
-      .text((name, i, nodes) => {
-        const reg = /[A-Za-z]/i;
-        const isEnglishName = reg.test(name);
-        console.log(name, isEnglishName, i, nodes);
-
-        if (isEnglishName) {
-          if (name.length > 8) {
-            return `${name.slice(0, 8)}...`;
-          } else {
-            return name;
-          }
-        } else {
-          if (name.length > 2) {
-            return `${name.slice(0, 2)}${name.slice(2, 5)}`;
-          } else {
-            return name;
-          }
-        }
+      .text(data => {
+        return data.name;
       });
 
-    // 绘制关系标签
-    edges.append('title').text(data => data.label);
-
-    const edgepaths = d3
-      .select('svg g')
-      .append('g')
-      .attr('class', 'paths')
-      .selectAll('.edgepath') //make path go along with the link provide position for link labels
-      .data(linksData)
-      .enter()
-      .append('path')
-      .attr('class', 'edgepath')
-      .attr('fill-opacity', 0)
-      .attr('stroke-opacity', 0)
-      .attr('id', function (d, i) {
-        return 'edgepath' + i;
+    nodes
+      .insert('foreignObject')
+      .attr('class', 'foreign-tip')
+      .attr('width', ({ level }) => 3 * svgData.rediusList[level])
+      .attr('height', ({ level }) => 3 * svgData.rediusList[level])
+      .attr(
+        'transform',
+        ({ level }) =>
+          `translate(${-1.5 * svgData.rediusList[level]}, ${-1.5 * svgData.rediusList[level]})`,
+      )
+      .insert('xhtml:div')
+      .attr('style', ({ colorIdx }) => {
+        return `width:100%;height:100%;background:${svgData.colorList[colorIdx]}`;
+      })
+      .attr('class', 'fulltext')
+      .append('span')
+      .attr('style', ({ level }) => {
+        return `display:inline-block;width:${2 * svgData.rediusList[level]}px;`;
+      })
+      .text((data: INode) => {
+        return data.name;
       });
-    // .style('pointer-events', 'none');
-
-    const edgelabels = d3
-      .select('svg g')
-      .append('g')
-      .attr('class', 'tagLabels')
-      .selectAll('.edgelabel')
-      .data(linksData)
-      .enter()
-      .append('text')
-      .attr('style', `pointer-events: none;font-size:12px`)
-      .attr('class', 'edgelabel')
-      .attr('id', function (d, i) {
-        return 'edgelabel' + i;
-      })
-      .attr('font-size', '24px')
-      .attr('fill', '#fff');
-    // .style('display', 'none');
-
-    edgelabels
-      .append('textPath') //To render text along the shape of a <path>, enclose the text in a <textPath> element that has an href attribute with a reference to the <path> element.
-      .attr('xlink:href', function (d, i) {
-        return '#edgepath' + i;
-      })
-      .style('text-anchor', 'middle')
-      // .style('pointer-events', 'none')
-      .attr('startOffset', '50%')
-      .text(d => d.label);
-    // .text('默认关系标签');
   };
 
   // 绘制关系标签
@@ -336,37 +258,6 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
     }
     d.fx = null;
     d.fy = null;
-  };
-  // 搜专家-关系图谱点击实体
-  const clickNodeHandle = data => {
-    const centerCircleId = 1;
-    console.log(data, centerCircleId);
-
-    const nodeList = d3.selectAll('.node');
-    nodeList.style('opacity', 0.2);
-    // const edgeList = d3.selectAll('.edge');
-    // edgeList.style('display', 'none')
-    //关系标签
-    // const relationLabels = d3.selectAll('.edgelabel');
-    // relationLabels.style('display', 'none')
-    // const selectedArr = [data.id, centerCircleId];
-
-    // const nodesFilter = nodeList.filter((item: d3.BaseType) => {
-    //   return selectedArr.includes(item.id);
-    // });
-    // nodesFilter.style('opacity', 1);
-
-    // const edgeFilter = edgeList.filter(item => {
-    //   return item.source.id === centerCircleId && item.target.id === data.id;
-    // });
-
-    // edgeFilter.style('display', '');
-
-    // const labelFilter = relationLabels.filter(item => {
-    //   return item.source.id === centerCircleId && item.target.id === data.id;
-    // });
-
-    // labelFilter.style('display', '');
   };
   return (
     <div className={css['graph-wrapper']}>

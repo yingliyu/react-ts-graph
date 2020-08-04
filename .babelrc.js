@@ -1,20 +1,25 @@
 module.exports = {
   presets: [
     [
+      '@babel/preset-react',
       '@babel/env',
       '@babel/react',
       {
         targets: {
-          ie: '11'
-        }
-      }
+          ie: '11',
+        },
+      },
     ],
     [
       '@babel/preset-env',
       {
-        useBuiltIns: 'entry'
-      }
-    ]
+        useBuiltIns: 'entry',
+      },
+    ],
   ],
-  plugins: ['add-module-exports']
-}
+  plugins: [
+    'add-module-exports',
+    '@babel/plugin-transform-typescript',
+    '@babel/plugin-transform-runtime',
+  ],
+};
