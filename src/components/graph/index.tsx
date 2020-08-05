@@ -4,8 +4,6 @@ import './style.less';
 import graphData from './data';
 import * as d3 from 'd3';
 
-type abc = string | number | boolean | null | 'true';
-
 interface IGraphProps {
   title?: string;
 }
@@ -19,8 +17,6 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
     level: number;
     colorIdx: number;
     keyword: string;
-    // layout?: {};
-    // layoutList?: {};
   };
 
   type ILink = d3.SimulationLinkDatum<INode> & {
@@ -30,10 +26,6 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
   const nodesData: INode[] = graphData.nodes;
   const linksData: ILink[] = graphData.relations;
 
-  useEffect((): void => {
-    initSvg();
-    initForceSimulation();
-  }, []);
   const svgData = {
     top: 20,
     right: 20,
@@ -45,7 +37,12 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
     rediusList: [100, 80, 60, 50, 40, 30],
     fontSizeList: [22, 18, 16, 14, 13, 12],
   };
-  let simulation;
+
+  useEffect((): void => {
+    initSvg();
+    initForceSimulation();
+  }, []);
+
   const initSvg = (): void => {
     d3.select('#graph-container')
       .append('svg')
@@ -54,7 +51,8 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
       .append('g')
       .attr('transform', `translate(${svgData.top}, ${svgData.left})`);
   };
-
+  let simulation;
+  // 创建一个力导向图
   const initForceSimulation = () => {
     // 创建一个弹簧力，根据 link 的 strength 值决定强度
     const linkForce = d3
@@ -74,21 +72,17 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
       });
     const nodeCollision = d3
       .forceCollide()
-      .radius((d: INode) => {
-        console.log(d);
-        return svgData.rediusList[d.level] * 1.2;
-      })
+      .radius(node => svgData.rediusList[(node as INode).level] * 1.2)
       .iterations(0.5)
       .strength(0.5);
 
     const nodeCharge = d3
       .forceManyBody()
-      .strength((d: INode) => -(9 - d.level) * 30)
+      .strength(node => -(9 - (node as INode).level) * 30)
       .theta(0.01)
       .distanceMin(15)
       .distanceMax(20);
 
-    // 创建一个力导向图
     simulation = d3
       .forceSimulation<INode, ILink>(nodesData)
       .alpha(2) // 活力，渲染之后再自动动多久
@@ -116,22 +110,27 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
           ' ' +
           (source as INode).y +
           ' L ' +
-          (source as INode).x +
+          (target as INode).x +
           ' ' +
-          (source as INode).y,
+          (target as INode).y,
       );
     });
-
+    // simulation.force('link').links(linksData);
     // 手动调用 tick 使布局达到稳定状态
-    // for (
-    //   let i = 0,
-    //     n = Math.ceil(Math.log(simulation.alphaMin()) / Math.log(1 - simulation.alphaDecay()));
-    //   i < n;
-    //   ++i
-    // ) {
-    //   simulation.tick();
-    // }
-
+    for (
+      let i = 0,
+        n = Math.ceil(Math.log(simulation.alphaMin()) / Math.log(1 - simulation.alphaDecay()));
+      i < n;
+      ++i
+    ) {
+      simulation.tick();
+    }
+    const edges = drewLines();
+    const nodes = drawNodes();
+    const edgepaths = drawEdgeLabel();
+  };
+  // 绘制关系线
+  const drewLines = () => {
     // 绘制关系线
     const edges = d3
       .select('svg g')
@@ -143,10 +142,15 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
       .append('line')
       .attr('class', 'edge')
       .attr('stroke', '#ccc')
-      .attr('stroke-width', '2px');
-    // .style('display', 'none');
+      .attr('stroke-width', '2px')
+      .style('display', 'none');
+    // edges.append('title').text(data => data.label);
 
-    // 绘制实体节点
+    return edges;
+  };
+
+  // 绘制实体节点
+  const drawNodes = () => {
     const nodes = d3
       .select('svg g')
       .append('g')
@@ -157,10 +161,9 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
       .append('g')
       .attr('class', 'node')
       .attr('name', data => {
-        // console.log(data);
         return data.name;
       })
-      .call(d3.drag().on('start', started).on('drag', dragged).on('end', ended))
+      // .call(d3.drag().on('start', started).on('drag', dragged).on('end', ended))
       .on('click', d => {
         clickNodeHandle(d);
       });
@@ -192,12 +195,13 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
 
       .append('tspan')
       .selectAll('tspan')
-      .data((d: INode) => {
-        if (d.name) {
-          if (d.name.includes('.')) {
-            return d.name.split('.');
+      .data(node => {
+        const name = (node as INode).name;
+        if (name) {
+          if (name.includes('.')) {
+            return name.split('.');
           } else {
-            return d.name.split(' ');
+            return name.split(' ');
           }
         }
       })
@@ -226,8 +230,6 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
       .text((name, i, nodes) => {
         const reg = /[A-Za-z]/i;
         const isEnglishName = reg.test(name);
-        console.log(name, isEnglishName, i, nodes);
-
         if (isEnglishName) {
           if (name.length > 8) {
             return `${name.slice(0, 8)}...`;
@@ -242,15 +244,16 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
           }
         }
       });
+    return nodes;
+  };
 
-    // 绘制关系标签
-    edges.append('title').text(data => data.label);
-
+  // 绘制关系标签
+  const drawEdgeLabel = () => {
     const edgepaths = d3
       .select('svg g')
       .append('g')
       .attr('class', 'paths')
-      .selectAll('.edgepath') //make path go along with the link provide position for link labels
+      .selectAll('path') //make path go along with the link provide position for link labels
       .data(linksData)
       .enter()
       .append('path')
@@ -259,8 +262,8 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
       .attr('stroke-opacity', 0)
       .attr('id', function (d, i) {
         return 'edgepath' + i;
-      });
-    // .style('pointer-events', 'none');
+      })
+      .style('pointer-events', 'none');
 
     const edgelabels = d3
       .select('svg g')
@@ -276,8 +279,8 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
         return 'edgelabel' + i;
       })
       .attr('font-size', '24px')
-      .attr('fill', '#fff');
-    // .style('display', 'none');
+      .attr('fill', '#fff')
+      .style('display', 'none');
 
     edgelabels
       .append('textPath') //To render text along the shape of a <path>, enclose the text in a <textPath> element that has an href attribute with a reference to the <path> element.
@@ -285,38 +288,49 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
         return '#edgepath' + i;
       })
       .style('text-anchor', 'middle')
-      // .style('pointer-events', 'none')
+      .style('pointer-events', 'none')
       .attr('startOffset', '50%')
       .text(d => d.label);
-    // .text('默认关系标签');
+    return edgepaths;
   };
 
-  // 绘制关系标签
-  // const renderRelationTag = () => {
-  //   console.log('关系标签');
-  // };
-  // const renderNodes = () => {
-  //   // 绘制实体节点
-  //   const nodes = d3
-  //     .select('svg g')
-  //     .append('g')
-  //     .selectAll('.node')
-  //     .data(data.nodes)
-  //     .enter()
-  //     .append('g')
-  //     .attr('class', 'node')
-  //     .attr('name', data => {
-  //       console.log(data);
-  //       return data.name;
-  //     })
+  // 专家关系图谱实体点击事件
+  const clickNodeHandle = (data: INode) => {
+    // 中心词只显示浮层信息
+    if (data.id === 1) return;
+    //和中心词的关系
+    const nodeList = d3.selectAll('.node');
+    nodeList.style('opacity', 0.2);
+    const edgeList = d3.selectAll('.edge');
+    const relationLabels = d3.selectAll('.edgelabel');
+    const relation = linksData.filter(({ target }) => (target as INode).id === data.id);
+    const centerRelationName = relation ? relation[0].label : ''; // 点击实体和中心词之间的关系
+    edgeList.style('display', 'none');
+    relationLabels.style('display', 'none');
 
-  // .attr('transform', data => `translate(${data.x}, ${data.y})`)
-  // .call(d3.drag().on('start', this.started).on('drag', this.dragged).on('end', this.ended))
-  // .on('click', d => {
-  //   // this.clickNodeHandle(d);
-  // });
-  // };
-  const started = d => {
+    const centerCircleId = 1;
+    const selectNodeIds = [centerCircleId];
+    linksData.forEach(({ target, source, label }) => {
+      if (label === centerRelationName) {
+        selectNodeIds.push((target as INode).id);
+      }
+    });
+    const nodesFilter = nodeList.filter(item => {
+      return selectNodeIds.includes((item as INode).id);
+    });
+    const edgeFilter = edgeList.filter(item => {
+      return (item as ILink).label === centerRelationName;
+    });
+    //关系标签
+    const labelFilter = relationLabels.filter(item => {
+      return (item as ILink).label === centerRelationName;
+    });
+    nodesFilter.style('opacity', 1);
+    edgeFilter.style('display', '');
+    labelFilter.style('display', '');
+  };
+
+  const started = (d: INode) => {
     if (!d3.event.active) {
       simulation.alphaTarget(0.3).restart();
     }
@@ -325,49 +339,19 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
     d.fy = d.y;
   };
 
-  const dragged = d => {
+  const dragged = (d: INode) => {
     d.fx = d3.event.x;
     d.fy = d3.event.y;
   };
 
-  const ended = d => {
+  const ended = (d: INode) => {
     if (!d3.event.active) {
       simulation.alphaTarget(0);
     }
     d.fx = null;
     d.fy = null;
   };
-  // 搜专家-关系图谱点击实体
-  const clickNodeHandle = data => {
-    const centerCircleId = 1;
-    console.log(data, centerCircleId);
 
-    const nodeList = d3.selectAll('.node');
-    nodeList.style('opacity', 0.2);
-    // const edgeList = d3.selectAll('.edge');
-    // edgeList.style('display', 'none')
-    //关系标签
-    // const relationLabels = d3.selectAll('.edgelabel');
-    // relationLabels.style('display', 'none')
-    // const selectedArr = [data.id, centerCircleId];
-
-    // const nodesFilter = nodeList.filter((item: d3.BaseType) => {
-    //   return selectedArr.includes(item.id);
-    // });
-    // nodesFilter.style('opacity', 1);
-
-    // const edgeFilter = edgeList.filter(item => {
-    //   return item.source.id === centerCircleId && item.target.id === data.id;
-    // });
-
-    // edgeFilter.style('display', '');
-
-    // const labelFilter = relationLabels.filter(item => {
-    //   return item.source.id === centerCircleId && item.target.id === data.id;
-    // });
-
-    // labelFilter.style('display', '');
-  };
   return (
     <div className={css['graph-wrapper']}>
       <section id="graph-container"></section>

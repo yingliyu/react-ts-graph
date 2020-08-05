@@ -14,8 +14,8 @@ export default {
     {
       id: 2,
       code: 1,
-      name: '荣誉',
-      type: 'honor',
+      name: '专家1号',
+      type: 'expert',
       level: 2,
       colorIdx: 5,
       keyword: '吴恩达',
@@ -28,8 +28,8 @@ export default {
     {
       id: 3,
       code: 2,
-      name: '组织',
-      type: 'org',
+      name: '专家2号',
+      type: 'expert',
       level: 2,
       colorIdx: 6,
       keyword: '吴恩达',
@@ -818,13 +818,13 @@ export default {
       id: 1,
       source: 0,
       target: 1,
-      label: '关系标签0',
+      label: '同机构',
     },
     {
       id: 2,
       source: 0,
       target: 2,
-      label: '关系标签1',
+      label: '同机构',
     },
     {
       id: 3,
@@ -854,21 +854,25 @@ export default {
       id: 4,
       source: 3,
       target: 4,
+      label: '关系标签6',
     },
     {
       id: 5,
       source: 3,
       target: 6,
+      label: '同发文',
     },
     {
       id: 6,
       source: 3,
       target: 7,
+      label: '关系标签7',
     },
     {
       id: 7,
       source: 6,
       target: 8,
+      label: '关系标签8',
     },
     {
       id: 8,
