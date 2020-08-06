@@ -45,7 +45,6 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
     rediusList: [100, 80, 60, 50, 40, 30],
     fontSizeList: [22, 20, 18, 16, 14, 12],
   };
-  let simulation;
   const initSvg = (): void => {
     d3.select('#graph-container')
       .append('svg')
@@ -74,22 +73,19 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
       });
     const nodeCollision = d3
       .forceCollide()
-      .radius((d: INode) => {
-        console.log(d);
-        return svgData.rediusList[d.level] * 1.2;
-      })
+      .radius(node => svgData.rediusList[(node as INode).level] * 1.2)
       .iterations(0.5)
       .strength(0.5);
 
     const nodeCharge = d3
       .forceManyBody()
-      .strength((d: INode) => -(9 - d.level) * 30)
+      .strength(node => -(9 - (node as INode).level) * 30)
       .theta(0.01)
       .distanceMin(15)
       .distanceMax(20);
 
     // 创建一个力导向图
-    simulation = d3
+    const simulation = d3
       .forceSimulation<INode, ILink>(nodesData)
       .alpha(2) // 活力，渲染之后再自动动多久
       .force('link', linkForce) // 映射id & 线的长度
@@ -155,8 +151,8 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
       .attr('name', data => {
         // console.log(data);
         return data.name;
-      })
-      .call(d3.drag().on('start', started).on('drag', dragged).on('end', ended));
+      });
+    // .call(d3.drag().on('start', started).on('drag', dragged).on('end', ended));
     // .on('click', d => {
     //   // this.clickNodeHandle(d);
     // });
@@ -238,24 +234,24 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
   //   // this.clickNodeHandle(d);
   // });
   // };
-  const started = d => {
-    if (!d3.event.active) {
-      simulation.alphaTarget(0.3).restart();
-    }
+  const started = (d: INode) => {
+    // if (!d3.event.active) {
+    //   simulation.alphaTarget(0.3).restart();
+    // }
     d3.event.sourceEvent.stopPropagation();
     d.fx = d.x;
     d.fy = d.y;
   };
 
-  const dragged = d => {
+  const dragged = (d: INode) => {
     d.fx = d3.event.x;
     d.fy = d3.event.y;
   };
 
-  const ended = d => {
-    if (!d3.event.active) {
-      simulation.alphaTarget(0);
-    }
+  const ended = (d: INode) => {
+    // if (!d3.event.active) {
+    //   simulation.alphaTarget(0);
+    // }
     d.fx = null;
     d.fy = null;
   };

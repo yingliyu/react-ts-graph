@@ -16,16 +16,20 @@
     "@types/react-dom": "^16.9.0",
     "@types/react-router-dom": "^5.1.5",
     "antd": "3.26.18",
+    "axios": "^0.19.2",
     "core-js": "^3.6.5",
     "craco-less": "^1.17.0",
     "customize-cra": "^1.0.0",
     "d3": "^5.16.0",
+    "qs": "^6.9.4",
     "react": "^16.13.1",
     "react-app-rewired": "^2.1.6",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
-    "typescript": "~3.7.2"
+    "tslint-react": "^5.0.0",
+    "typescript": "^3.9.7",
+    "typescript-tslint-plugin": "^0.5.5"
   },
   "scripts": {
     "start": "react-app-rewired start",
@@ -59,6 +63,7 @@
     "@babel/plugin-transform-typescript": "^7.11.0",
     "@babel/preset-env": "^7.10.4",
     "@babel/preset-react": "^7.10.4",
-    "babel-plugin-import": "^1.13.0"
+    "babel-plugin-import": "^1.13.0",
+    "tslint": "^6.1.3"
   }
 }

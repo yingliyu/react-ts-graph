@@ -25,7 +25,7 @@ const config = override(
       noIeCompat: true,
       modules: true,
       javascriptEnabled: true,
-      modifyVars: { '@primary-color': '#f9c700' },
+      modifyVars: { '@primary-color': '#1890ff' },
     },
   }),
   // 使用.eslintrc.js

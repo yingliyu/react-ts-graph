@@ -15,7 +15,8 @@
     "noEmit": true,
     "jsx": "react",
     "outDir": "./dist",
-    "sourceMap": true
+    "sourceMap": true,
+    "plugins": [{ "name": "typescript-tslint-plugin" }]
   },
   "include": ["src"]
 }

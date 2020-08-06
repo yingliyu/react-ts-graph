@@ -1,14 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import css from './index.module.less';
-import './style.less';
 import graphData from './data';
 import * as d3 from 'd3';
-
 interface IGraphProps {
   title?: string;
 }
 
-const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
+const Graph: React.FC<IGraphProps> = () => {
   type INode = d3.SimulationNodeDatum & {
     id: number;
     code: number;
@@ -31,18 +29,19 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
     right: 20,
     bottom: 20,
     left: 20,
-    svgW: 1200,
-    svgH: 900,
+    svgW: 1000,
+    svgH: 800,
     colorList: ['#967adc', '#8cc152', '#3bafda', '#f6bb42', '#37bc9b', '#ff7e90', '#ff7043'],
     rediusList: [100, 80, 60, 50, 40, 30],
     fontSizeList: [22, 18, 16, 14, 13, 12],
   };
-
+  const [forceSimulation, setSimulation] = useState<d3.Simulation<INode, ILink>>();
   useEffect((): void => {
     initSvg();
     initForceSimulation();
   }, []);
 
+  // 初始化SVG
   const initSvg = (): void => {
     d3.select('#graph-container')
       .append('svg')
@@ -51,7 +50,8 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
       .append('g')
       .attr('transform', `translate(${svgData.top}, ${svgData.left})`);
   };
-  let simulation;
+
+
   // 创建一个力导向图
   const initForceSimulation = () => {
     // 创建一个弹簧力，根据 link 的 strength 值决定强度
@@ -83,7 +83,7 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
       .distanceMin(15)
       .distanceMax(20);
 
-    simulation = d3
+    const simulation = d3
       .forceSimulation<INode, ILink>(nodesData)
       .alpha(2) // 活力，渲染之后再自动动多久
       .force('link', linkForce) // 映射id & 线的长度
@@ -115,16 +115,19 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
           (target as INode).y,
       );
     });
+
     // simulation.force('link').links(linksData);
     // 手动调用 tick 使布局达到稳定状态
-    for (
-      let i = 0,
-        n = Math.ceil(Math.log(simulation.alphaMin()) / Math.log(1 - simulation.alphaDecay()));
-      i < n;
-      ++i
-    ) {
-      simulation.tick();
-    }
+    // for (
+    //   let i = 0,
+    //     n = Math.ceil(Math.log(simulation.alphaMin()) / Math.log(1 - simulation.alphaDecay()));
+    //   i < n;
+    //   ++i
+    // ) {
+    //   simulation.tick();
+    // }
+    setSimulation(simulation);
+
     const edges = drewLines();
     const nodes = drawNodes();
     const edgepaths = drawEdgeLabel();
@@ -163,8 +166,15 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
       .attr('name', data => {
         return data.name;
       })
-      // .call(d3.drag().on('start', started).on('drag', dragged).on('end', ended))
+      // .call(
+      //   d3
+      //     .drag()
+      //     .on('start', started)
+      //     .on('drag', dragged)
+      //     .on('end', ended)
+      // )
       .on('click', d => {
+        console.log(d)
         clickNodeHandle(d);
       });
 
@@ -190,13 +200,12 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
       .attr('style', ({ level }) => {
         return `cursor: pointer;text-anchor: middle;dominant-baseline: middle;font-size:${
           svgData.fontSizeList[level - 1]
-        }px`;
+          }px`;
       })
 
       .append('tspan')
       .selectAll('tspan')
-      .data(node => {
-        const name = (node as INode).name;
+      .data(({ name }) => {
         if (name) {
           if (name.includes('.')) {
             return name.split('.');
@@ -204,6 +213,7 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
             return name.split(' ');
           }
         }
+        return [];
       })
       .join('tspan')
       .attr('fill', '#f1f1f1')
@@ -217,7 +227,7 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
           } else if (i === 1) {
             return '0.5em';
           }
-        } else if (nodes.length === 3) {
+        } else if (nodes.length >= 3) {
           if (i === 0) {
             return '-0.8em';
           } else if (i === 1) {
@@ -226,8 +236,9 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
             return '1.2em';
           }
         }
+        return '';
       })
-      .text((name, i, nodes) => {
+      .text((name) => {
         const reg = /[A-Za-z]/i;
         const isEnglishName = reg.test(name);
         if (isEnglishName) {
@@ -253,7 +264,7 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
       .select('svg g')
       .append('g')
       .attr('class', 'paths')
-      .selectAll('path') //make path go along with the link provide position for link labels
+      .selectAll('path') // make path go along with the link provide position for link labels
       .data(linksData)
       .enter()
       .append('path')
@@ -283,14 +294,15 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
       .style('display', 'none');
 
     edgelabels
-      .append('textPath') //To render text along the shape of a <path>, enclose the text in a <textPath> element that has an href attribute with a reference to the <path> element.
+      .append('textPath') // To render text along the shape of a <path>, enclose the text in a <textPath> element that has an href attribute with a reference to the <path> element.
       .attr('xlink:href', function (d, i) {
         return '#edgepath' + i;
       })
       .style('text-anchor', 'middle')
       .style('pointer-events', 'none')
       .attr('startOffset', '50%')
-      .text(d => d.label);
+      .text(({ label }) => label || '');
+
     return edgepaths;
   };
 
@@ -298,7 +310,7 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
   const clickNodeHandle = (data: INode) => {
     // 中心词只显示浮层信息
     if (data.id === 1) return;
-    //和中心词的关系
+    // 和中心词的关系
     const nodeList = d3.selectAll('.node');
     nodeList.style('opacity', 0.2);
     const edgeList = d3.selectAll('.edge');
@@ -310,7 +322,7 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
 
     const centerCircleId = 1;
     const selectNodeIds = [centerCircleId];
-    linksData.forEach(({ target, source, label }) => {
+    linksData.forEach(({ target, label }) => {
       if (label === centerRelationName) {
         selectNodeIds.push((target as INode).id);
       }
@@ -321,7 +333,7 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
     const edgeFilter = edgeList.filter(item => {
       return (item as ILink).label === centerRelationName;
     });
-    //关系标签
+    // 关系标签
     const labelFilter = relationLabels.filter(item => {
       return (item as ILink).label === centerRelationName;
     });
@@ -330,30 +342,37 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
     labelFilter.style('display', '');
   };
 
-  const started = (d: INode) => {
-    if (!d3.event.active) {
-      simulation.alphaTarget(0.3).restart();
+  const started = (d: INode): void => {
+    if (d) {
+      if (!d3.event.active) {
+        (forceSimulation as d3.Simulation<INode, ILink>).alphaTarget(0.3).restart();
+      }
+      d3.event.sourceEvent.stopPropagation();
+      d.fx = d.x;
+      d.fy = d.y;
     }
-    d3.event.sourceEvent.stopPropagation();
-    d.fx = d.x;
-    d.fy = d.y;
   };
 
-  const dragged = (d: INode) => {
-    d.fx = d3.event.x;
-    d.fy = d3.event.y;
+  const dragged = (d: INode): void => {
+    if (d) {
+      d.fx = d3.event.x;
+      d.fy = d3.event.y;
+    }
   };
 
-  const ended = (d: INode) => {
-    if (!d3.event.active) {
-      simulation.alphaTarget(0);
+  const ended = (d: INode): void => {
+    if (d) {
+      if (!d3.event.active) {
+        (forceSimulation as d3.Simulation<INode, ILink>).alphaTarget(0);
+      }
+      d.fx = null;
+      d.fy = null;
     }
-    d.fx = null;
-    d.fy = null;
   };
 
   return (
     <div className={css['graph-wrapper']}>
+
       <section id="graph-container"></section>
     </div>
   );
