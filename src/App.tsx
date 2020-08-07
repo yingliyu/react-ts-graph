@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import css from './styles/app.module.less';
 import loadable from '@loadable/component';
+import Loading from './components/loading/index.jsx'
+
 const Home = loadable(() => import('./pages/home'), {
   fallback: <div>加载中...</div>,
 });
@@ -22,6 +24,9 @@ const App: React.FC = () => (
         <Redirect to="/404" />
       </Switch>
     </Router>
+    <div id="loadingWrapper" className={css['loading-wrapper']}>
+      <Loading />
+    </div>
   </div>
 );
 

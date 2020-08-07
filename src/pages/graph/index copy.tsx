@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Graph from '../../components/graph';
-import EchartsGraph from '../../components/charts/graph';
-// import EffectScatter from '../../components/charts/effect-scatter';
 import { baseApi, expertApi } from '../../services'
 import css from './index.module.less'
-import { Input, Radio, Button } from 'antd';
+import { Input, Radio, Button, message } from 'antd';
 let examplePage: number = 1
 
 const GraphPage: React.FC = props => {
@@ -34,12 +32,9 @@ const GraphPage: React.FC = props => {
   const [activeExampleId, seActiveExampleId] = useState('0')
   const [showExample, setShowExample] = useState(false)
   const [graphData, setGraphData] = useState()
-  const [activeGraph, setActiveGraph] = useState(0)
-  const [queryValue, setQueryValue] = useState('')
   useEffect(() => {
     getGraphData()
   }, [])
-
   // 初始化示例数据
   const getExamplesData = async () => {
     try {
@@ -66,13 +61,6 @@ const GraphPage: React.FC = props => {
       console.log(error)
     }
   }
-  const inputChangeHandle = (event: any): void => {
-    event.persist()
-    setQueryValue(event.target.value)
-  }
-  const inputSearchHandle = (val: any) => {
-    console.log('search keyword===', val);
-  }
   const showExampleHandle = () => {
     if (!showExample) {
       examplePage = 1
@@ -90,27 +78,20 @@ const GraphPage: React.FC = props => {
     examplePage = examplePage === 5 ? 1 : examplePage + 1
     getExamplesData()
   }
-  const toggleGraphHandle = () => {
-    setActiveGraph(activeGraph === 0 ? 1 : 0)
-  }
   return (
     <div className={css['graph-page-wrapper']}>
       <h2>上海人工智能研发资源图谱</h2>
       <div className={css['container']}>
         <section className={[`${css['aside-left-wrapper']}`, `${css['aside-wrapper']}`].join(' ')}>
-          <EchartsGraph />
-          {/* <EffectScatter /> */}
+          left content
         </section>
         <div className={css['main-wrapper']}>
           <div className={css['search-wrapper']}>
             <Input.Search
-              value={queryValue}
               placeholder="请您输入您所要查询的内容"
-              onChange={e => inputChangeHandle(e)}
-              onSearch={value => inputSearchHandle(value)}
+              onSearch={value => console.log(value)}
               style={{ width: 400 }}
               loading={false}
-              maxLength={100}
             />
             <span className={css['example-btn']} onClick={showExampleHandle}>示例</span>
             <div className={[`${css['examples-wrapper']}`, `${showExample ? css['show-example'] : ''}`].join(' ')}>
@@ -135,7 +116,7 @@ const GraphPage: React.FC = props => {
                   if (item.entityType === 'SUBJECT') {
                     return (
                       <Button
-                        className={item.entityId === activeExampleId ? css['active'] : ''}
+                        className={item.entityId === activeExampleId ? css['active-field'] : ''}
                         key={item.entityName}
                         onClick={() => exampleClickHandle(item)}
                       >
@@ -152,9 +133,9 @@ const GraphPage: React.FC = props => {
             </div>
           </div>
           <div className={css['toggle-btn-group']}>
-            <Radio.Group value={activeGraph} onChange={toggleGraphHandle}>
-              <Radio.Button value={0}>关系图谱</Radio.Button>
-              <Radio.Button value={1}>资源图谱</Radio.Button>
+            <Radio.Group>
+              <Radio.Button value="large">关系图谱</Radio.Button>
+              <Radio.Button value="default">资源图谱</Radio.Button>
             </Radio.Group>
           </div>
           {/* 引用知识图谱组件 */}

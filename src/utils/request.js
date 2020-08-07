@@ -1,20 +1,26 @@
 import instance from './axios';
 import { message } from 'antd';
 import qs from 'qs';
-
+message.config({
+  top: 20,
+  duration: 1,
+  maxCount: 1,
+});
 export function AppPost(url, data) {
   return new Promise((resolve, reject) => {
     instance
       .post(url, data)
       .then(res => {
+        console.log(res);
         if (res.data.code === 200) {
           resolve(res.data.data);
         } else {
+          message.error(res.data.msg);
           reject(res.data.msg);
         }
       })
       .catch(err => {
-        message.error(err, 1000);
+        message.error(err.toString());
         reject(err);
       });
   });
@@ -35,12 +41,12 @@ export function AppGet(url, data) {
         if (res.data.code === 200) {
           resolve(res.data.data);
         } else {
+          message.error(res.data.msg);
           reject(res.data.msg);
         }
       })
       .catch(err => {
-        console.log(err);
-        message.error(err, 1000);
+        message.error(err.toString());
         reject(err);
       });
   });

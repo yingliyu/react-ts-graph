@@ -1,5 +1,4 @@
 import { AppPost } from '../../utils/request';
-import App from '../../app';
 
 type expertGraphParams = {
   entityId: string;
