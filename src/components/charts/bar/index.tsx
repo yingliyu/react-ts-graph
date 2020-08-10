@@ -10,97 +10,109 @@ const Bar = () => {
     // 基于准备好的dom，初始化echarts实例
     var myChart = echarts.init(container);
 
-    const data = [{
-      name: "使用中资源量",
-      value: 754
-    },
-    {
-      name: "维修中资源量",
-      value: 611
-    },
-    {
-      name: "保养中资源量",
-      value: 400
-    },
-    {
-      name: "已损坏资源量",
-      value: 200
-    }
-    ];
-
-    const arrName = getArrayValue(data, "name");
-    const arrValue = getArrayValue(data, "value");
-    const sumValue = eval(arrValue.join('+'));
-    const objData = array2obj(data, "name");
-    const optionData = getData(data, sumValue)
-
-
-    const option: any = {
-      backgroundColor: '#fff',
-      legend: {
-        show: true,
-        icon: "circle",
-        top: "center",
-        left: '70%',
-        data: arrName,
-        width: 50,
-        padding: [0, 5],
-        itemGap: 25,
-        formatter: function (name: any) {
-          return "{title|" + name + "}\n{value|" + (objData[name].value) + "}  {title|项}"
+    var dataStyle = {
+      normal: {
+        label: {
+          show: false
         },
-        textStyle: {
-          rich: {
-            title: {
-              fontSize: 16,
-              lineHeight: 15,
-              color: "rgb(0, 178, 246)"
-            },
-            value: {
-              fontSize: 18,
-              lineHeight: 20,
-              color: "#fff"
-            }
-          }
+        labelLine: {
+          show: false
         },
+        shadowBlur: 30,
+        shadowColor: 'rgba(40, 40, 40, 0.3)',
+      }
+    };
+
+    var placeHolderStyle = {
+      normal: {
+        color: 'rgba(0,0,0,0)',
+        label: {
+          show: false
+        },
+        labelLine: {
+          show: false
+        }
       },
+      emphasis: {
+        color: 'rgba(0,0,0,0)'
+      }
+    };
+
+    const option = {
+      color: ["#4C3CAE", "#8C0F86", "#CA2C95", "#E1A4C4", "#857ABA"],
       tooltip: {
         show: true,
-        trigger: "item",
-        formatter: "{a}<br>{b}:{c}({d}%)"
+        formatter: "{a} <br/>{b} : {c} ({d}%)"
       },
-      color: ['rgb(24, 183, 142)', 'rgb(1, 179, 238)', 'rgb(22, 75, 205)', 'rgb(52, 52, 176)'],
-      grid: {
-        top: '16%',
-        bottom: '53%',
-        left: "30%",
-        containLabel: false
+      legend: {
+        itemGap: 12,
+        top: '10%',
+        textStyle: {
+          color: '#FE80C8',
+        },
+        data: ['01', '02', '03', '04', '05', '06']
       },
-      yAxis: [{
-        type: 'category',
-        inverse: true,
-        axisLine: {
-          show: false
+
+      series: [{
+        name: 'Line 1',
+        type: 'pie',
+        clockWise: false,
+        radius: [40, 50],
+        itemStyle: dataStyle,
+        hoverAnimation: false,
+        data: [{
+          value: 100,
+          name: '01'
         },
-        axisTick: {
-          show: false
+        {
+          value: 50,
+          name: 'invisible',
+          itemStyle: placeHolderStyle
+        }
+
+        ]
+      },
+      {
+        name: 'Line 2',
+        type: 'pie',
+        clockWise: false,
+        radius: [30, 40],
+        itemStyle: dataStyle,
+        hoverAnimation: false,
+
+        data: [{
+          value: 50,
+          name: '02'
         },
-        axisLabel: {
-          interval: 0,
-          inside: true,
-          textStyle: {
-            color: "#fff",
-            fontSize: 16,
-          },
-          show: true
+        {
+          value: 50,
+          name: 'invisible',
+          itemStyle: placeHolderStyle
+        }
+        ]
+      },
+      {
+        name: 'Line 3',
+        type: 'pie',
+        clockWise: false,
+        hoverAnimation: false,
+        radius: [20, 30],
+        itemStyle: dataStyle,
+
+        data: [{
+          value: 20,
+          name: '03'
         },
-        data: optionData.yAxis
-      }],
-      xAxis: [{
-        show: false
-      }],
-      series: optionData.series
-    }
+        {
+          value: 50,
+          name: 'invisible',
+          itemStyle: placeHolderStyle
+        }
+        ]
+      }
+      ]
+    };
+
     // 使用刚指定的配置项和数据显示图表。
     myChart.setOption(option);
   }
