@@ -1,23 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import css from './index.module.less';
-import graphData from './data';
+// import graphData from './data';
 import * as d3 from 'd3';
+import { INode, ILink } from '../../utils/constant'
 interface IGraphProps {
   title?: string
   entities: INode[]
   relations: ILink[]
   expertId: string
 }
-type INode = d3.SimulationNodeDatum & {
-  id: string;
-  name: string;
-  type: string;
-  level?: number;
-};
+// type INode = d3.SimulationNodeDatum & {
+//   id: string,
+//   name: string,
+//   type: string,
+//   level: number,
+// };
 
-type ILink = d3.SimulationLinkDatum<INode> & {
-  label?: string;
-};
+// type ILink = d3.SimulationLinkDatum<INode> & {
+//   label?: string,
+//   relType: string,
+// };
+
+
 
 const Graph: React.FC<IGraphProps> = (props) => {
   console.log(props);
@@ -26,17 +30,17 @@ const Graph: React.FC<IGraphProps> = (props) => {
   // const linksData: ILink[] = graphData.relations;
   const nodesData: INode[] = props.entities ? props.entities : [];
   const linksData: ILink[] = props.relations ? props.relations : [];
-  console.log(nodesData, linksData)
+  // console.log(nodesData, linksData)
 
   const svgData = {
     top: 20,
     right: 20,
     bottom: 20,
     left: 20,
-    svgW: 1000,
-    svgH: 800,
+    svgW: 900,
+    svgH: 900,
     colorList: ['#967adc', '#8cc152', '#3bafda', '#f6bb42', '#37bc9b', '#ff7e90', '#ff7043'],
-    rediusList: [100, 80, 60, 50, 40, 30],
+    rediusList: [120, 80, 60, 50, 40, 30],
     fontSizeList: [22, 18, 16, 14, 13, 12],
   };
   const [forceSimulation, setSimulation] = useState<d3.Simulation<INode, ILink>>();
@@ -80,9 +84,9 @@ const Graph: React.FC<IGraphProps> = (props) => {
       .forceCollide()
       .radius((d) => {
         if ((d as INode).id === centerId) {
-          return 65
+          return 70
         } else {
-          return 45
+          return 48
         }
       })
       .iterations(0.5)
@@ -157,7 +161,7 @@ const Graph: React.FC<IGraphProps> = (props) => {
       .append('line')
       .attr('class', 'edge')
       .attr('stroke', '#ccc')
-      .attr('stroke-width', '2px')
+      .attr('stroke-width', '1px')
       .style('display', 'none');
     // edges.append('title').text(data => data.label);
 
@@ -187,7 +191,6 @@ const Graph: React.FC<IGraphProps> = (props) => {
         // .on('end', ended)
       )
       .on('click', d => {
-        console.log(d)
         clickNodeHandle(d);
       });
 
@@ -227,20 +230,21 @@ const Graph: React.FC<IGraphProps> = (props) => {
       .attr('class', 'node-text')
       .attr('width', '300px')
       .attr('fill', '#fff')
-      // .attr('style', ({ level }) => {
-      //   return `cursor: pointer;text-anchor: middle;dominant-baseline: middle;font-size:${
-      //     svgData.fontSizeList[level - 1]
-      //     }px`;
-      // })
+      .attr('style', ({ level }) => {
+        return `cursor: pointer;text-anchor: middle;dominant-baseline: middle;`;
+      })
 
       .append('tspan')
       .selectAll('tspan')
       .data(({ name }) => {
         if (name) {
+
           if (name.includes('.')) {
             return name.split('.');
+          } else if (name.includes('-')) {
+            return name.split('-');
           } else {
-            return name.split(' ');
+            return name.split(' ')
           }
         }
         return [];
@@ -264,6 +268,8 @@ const Graph: React.FC<IGraphProps> = (props) => {
             return '0.3em';
           } else if (i === 2) {
             return '1.2em';
+          } else {
+            return '-999em'
           }
         }
         return '';
@@ -314,13 +320,13 @@ const Graph: React.FC<IGraphProps> = (props) => {
       .data(linksData)
       .enter()
       .append('text')
-      .attr('style', `pointer-events: none;font-size:12px`)
+      .attr('style', `pointer-events: none;font-size:12px;`)
       .attr('class', 'edgelabel')
       .attr('id', function (d, i) {
         return 'edgelabel' + i;
       })
       .attr('font-size', '24px')
-      .attr('fill', '#fff')
+      .attr('fill', '#ff7043')
       .style('display', 'none');
 
     edgelabels
@@ -331,7 +337,7 @@ const Graph: React.FC<IGraphProps> = (props) => {
       .style('text-anchor', 'middle')
       .style('pointer-events', 'none')
       .attr('startOffset', '50%')
-      .text(({ label }) => label || '');
+      .text(({ relType }) => relType || '');
 
     return edgepaths;
   };
@@ -339,39 +345,45 @@ const Graph: React.FC<IGraphProps> = (props) => {
   // 专家关系图谱实体点击事件
   const clickNodeHandle = (data: INode) => {
     // 中心词只显示浮层信息
-
+    if (data.id === centerId)
+      return;
     // 和中心词的关系
     const nodeList = d3.selectAll('.node');
     nodeList.style('opacity', 0.2);
     const edgeList = d3.selectAll('.edge');
     const relationLabels = d3.selectAll('.edgelabel');
-    const relation = linksData.filter(({ target }) => (target as INode).id === data.id);
-    const centerRelationName = relation ? relation[0].label : ''; // 点击实体和中心词之间的关系
+    const currentEdges = linksData.filter(({ target }) => (target as INode).id === data.id);
+    console.log(currentEdges)
+    const centerRelationName = currentEdges ? currentEdges[0].relType : ''; // 点击实体和中心词之间的关系
     edgeList.style('display', 'none');
     relationLabels.style('display', 'none');
 
-
     const selectNodeIds: string[] = [centerId];
-    linksData.forEach(({ target, label }) => {
-      if (label === centerRelationName) {
+    // let temp: any = {}
+    linksData.forEach(({ target, relType }) => {
+      // temp[relType] ? temp[relType]++ : temp[relType] = 1
+      if (relType === centerRelationName) {
         selectNodeIds.push((target as INode).id);
       }
     });
+    // console.log(temp);
+
     const nodesFilter = nodeList.filter(item => {
       return selectNodeIds.includes((item as INode).id);
     });
     const edgeFilter = edgeList.filter(item => {
-      return (item as ILink).label === centerRelationName;
+      return (item as ILink).relType === centerRelationName;
     });
     // 关系标签
     const labelFilter = relationLabels.filter(item => {
-      return (item as ILink).label === centerRelationName;
+      return (item as ILink).relType === centerRelationName;
     });
+
     nodesFilter.style('opacity', 1);
     edgeFilter.style('display', '');
     labelFilter.style('display', '');
   };
-  // ValueFn<GElement, Datum, void>
+
   const started: (d: any) => any = (d: any) => {
     if (d) {
       if (!d3.event.active) {

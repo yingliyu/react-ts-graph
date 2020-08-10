@@ -71,7 +71,7 @@ const EchartsGraph: React.FC = () => {
       type: 'graph',
       layout: 'force',
       force: {
-        repulsion: 100, //节点之间的斥力因子
+        repulsion: 110, //节点之间的斥力因子
         edgeLength: 10
       },
       roam: true,
@@ -88,7 +88,7 @@ const EchartsGraph: React.FC = () => {
         "draggable": true,
         "itemStyle": {
           "normal": {
-            "shadowBlur": 100,
+            // "shadowBlur": 100,
             "shadowColor": colorList[0],
             "color": colorList[0]
           }
@@ -100,7 +100,7 @@ const EchartsGraph: React.FC = () => {
         "draggable": true,
         "itemStyle": {
           "normal": {
-            "shadowBlur": 100,
+            // "shadowBlur": 100,
             "shadowColor": colorList[1],
             "color": colorList[1]
           }
@@ -112,7 +112,7 @@ const EchartsGraph: React.FC = () => {
         "draggable": true,
         "itemStyle": {
           "normal": {
-            "shadowBlur": 100,
+            // "shadowBlur": 100,
             "shadowColor": colorList[2],
             "color": colorList[2]
           }
@@ -124,7 +124,7 @@ const EchartsGraph: React.FC = () => {
         "draggable": true,
         "itemStyle": {
           "normal": {
-            "shadowBlur": 100,
+            // "shadowBlur": 100,
             "shadowColor": colorList[3],
             "color": colorList[3]
           }
@@ -132,11 +132,11 @@ const EchartsGraph: React.FC = () => {
       }, {
         "name": "缅怀疫情中\n逝去的人们",
         "value": 4730,
-        "symbolSize": 88,
+        "symbolSize": 78,
         "draggable": true,
         "itemStyle": {
           "normal": {
-            "shadowBlur": 100,
+            // "shadowBlur": 100,
             "shadowColor": colorList[4],
             "color": colorList[4]
           }
@@ -148,7 +148,7 @@ const EchartsGraph: React.FC = () => {
         "draggable": true,
         "itemStyle": {
           "normal": {
-            "shadowBlur": 100,
+            // "shadowBlur": 100,
             "shadowColor": colorList[6],
             "color": colorList[6]
           }
@@ -160,7 +160,7 @@ const EchartsGraph: React.FC = () => {
         "draggable": true,
         "itemStyle": {
           "normal": {
-            "shadowBlur": 100,
+            // "shadowBlur": 100,
             "shadowColor": colorList[7],
             "color": colorList[7]
           }
@@ -172,7 +172,7 @@ const EchartsGraph: React.FC = () => {
         "draggable": true,
         "itemStyle": {
           "normal": {
-            "shadowBlur": 100,
+            // "shadowBlur": 100,
             "shadowColor": colorList[8],
             "color": colorList[8]
           }
@@ -184,7 +184,7 @@ const EchartsGraph: React.FC = () => {
         "draggable": true,
         "itemStyle": {
           "normal": {
-            "shadowBlur": 100,
+            // "shadowBlur": 100,
             "shadowColor": colorList[9],
             "color": colorList[9]
           }
@@ -196,7 +196,7 @@ const EchartsGraph: React.FC = () => {
         "draggable": true,
         "itemStyle": {
           "normal": {
-            "shadowBlur": 100,
+            // "shadowBlur": 100,
             "shadowColor": colorList[19],
             "color": colorList[19]
           }
@@ -215,6 +215,6 @@ const EchartsGraph: React.FC = () => {
     // 使用刚指定的配置项和数据显示图表。
     myChart.setOption(option);
   }
-  return <div id='echartsGraph' style={{ width: '100%', height: '300px' }}>echarts graph</div>
+  return <div id='echartsGraph' style={{ width: '100%', height: '260px', borderRadius: '5px' }}></div>
 }
 export default EchartsGraph

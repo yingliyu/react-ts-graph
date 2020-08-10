@@ -5,6 +5,12 @@ import EchartsGraph from '../../components/charts/graph';
 import { baseApi, expertApi } from '../../services'
 import css from './index.module.less'
 import { Input, Radio, Button } from 'antd';
+import ExpertInfo from './components/expert-info'
+import SubjectDistribution from './components/subject-distribution'
+import ExpertResume from './components/expert-resume'
+import LiteratureField from './components/literature-field'
+import Title from './components/title'
+
 let examplePage: number = 1
 
 const GraphPage: React.FC = props => {
@@ -15,20 +21,7 @@ const GraphPage: React.FC = props => {
     orgId: string
     orgName: string
   }
-  // type NodeType = {
-  //   entityId: string
-  //   entityLevel?: string
-  //   entityName: string
-  //   entityType: string
-  //   groupId?: string
-  // }
-  // type LinkType = {
-  //   relType: string
-  //   sourceId: string
-  //   sourceName: string
-  //   targetId: string
-  //   targetName: string
-  // }
+
   const exampleDefault: ExampleType[] = []
   const [exampleList, setExampleList] = useState(exampleDefault)
   const [activeExampleId, seActiveExampleId] = useState('0')
@@ -38,6 +31,7 @@ const GraphPage: React.FC = props => {
   const [queryValue, setQueryValue] = useState('')
   useEffect(() => {
     getGraphData()
+
   }, [])
 
   // 初始化示例数据
@@ -60,19 +54,21 @@ const GraphPage: React.FC = props => {
       }
       const res = await expertApi.getExpertGraph(params)
       console.log(res);
-
       setGraphData(res)
     } catch (error) {
       console.log(error)
     }
   }
+
   const inputChangeHandle = (event: any): void => {
     event.persist()
     setQueryValue(event.target.value)
   }
+
   const inputSearchHandle = (val: any) => {
     console.log('search keyword===', val);
   }
+
   const showExampleHandle = () => {
     if (!showExample) {
       examplePage = 1
@@ -82,22 +78,33 @@ const GraphPage: React.FC = props => {
       setShowExample(false)
     }
   }
+
   const exampleClickHandle = (item: ExampleType): void => {
     console.log('click ok===', item)
     seActiveExampleId(item.entityId)
   }
+
   const examplePageHandle = () => {
     examplePage = examplePage === 5 ? 1 : examplePage + 1
     getExamplesData()
   }
+
   const toggleGraphHandle = () => {
     setActiveGraph(activeGraph === 0 ? 1 : 0)
   }
+
   return (
     <div className={css['graph-page-wrapper']}>
       <h2>上海人工智能研发资源图谱</h2>
       <div className={css['container']}>
         <section className={[`${css['aside-left-wrapper']}`, `${css['aside-wrapper']}`].join(' ')}>
+          <div className={css['statistics-wrapper']}>
+            <span>实体134个</span>
+            <span>实体134个</span>
+          </div>
+          <ExpertInfo />
+          <SubjectDistribution />
+          <Title title='热词分布' />
           <EchartsGraph />
           {/* <EffectScatter /> */}
         </section>
@@ -108,7 +115,7 @@ const GraphPage: React.FC = props => {
               placeholder="请您输入您所要查询的内容"
               onChange={e => inputChangeHandle(e)}
               onSearch={value => inputSearchHandle(value)}
-              style={{ width: 400 }}
+              style={{ width: 480, height: 50 }}
               loading={false}
               maxLength={100}
             />
@@ -158,10 +165,15 @@ const GraphPage: React.FC = props => {
             </Radio.Group>
           </div>
           {/* 引用知识图谱组件 */}
-          <Graph {...graphData} {...props}></Graph>
+          <Graph {...graphData}  {...props}></Graph>
         </div>
         <section className={[`${css['aside-right-wrapper']}`, `${css['aside-wrapper']}`].join(' ')}>
-          right content
+          <div className={css['statistics-wrapper']}>
+            <span>实体134个</span>
+            <span>实体134个</span>
+          </div>
+          <ExpertResume />
+          <LiteratureField />
         </section>
       </div>
 
