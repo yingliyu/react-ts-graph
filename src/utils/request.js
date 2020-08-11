@@ -11,7 +11,6 @@ export function AppPost(url, data) {
     instance
       .post(url, data)
       .then(res => {
-        console.log(res);
         if (res.data.code === 200) {
           resolve(res.data.data);
         } else {

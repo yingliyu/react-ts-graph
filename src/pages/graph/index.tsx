@@ -8,10 +8,61 @@ import { Input, Radio, Button } from 'antd';
 import ExpertInfo from './components/expert-info'
 import SubjectDistribution from './components/subject-distribution'
 import ExpertResume from './components/expert-resume'
-import LiteratureField from './components/literature-field'
+// import LiteratureField from './components/literature-field'
 import Title from './components/title'
+import { LiteratureType } from '../../utils/constant'
+import Pie from '../../components/charts/pie'
+import Bar from '../../components/charts/bar'
 
 let examplePage: number = 1
+
+const literatureFieldList: LiteratureType[] = [{
+  name: "使用中资源量使用中资源量使用中资源量",
+  value: 1000
+},
+{
+  name: "维修中资源量",
+  value: 611
+},
+{
+  name: "保养中资源量",
+  value: 300
+},
+{
+  name: "已损坏资源量",
+  value: 100
+}
+];
+
+const journalDistributionList: LiteratureType[] = [{
+  name: 'name1',
+  value: 12
+},
+{
+  name: 'name2',
+  value: 20
+},
+{
+  name: 'name3dsfsdfsfsfsd',
+  value: 3
+},
+{
+  name: 'name4',
+  value: 12
+},
+{
+  name: 'name5',
+  value: 123
+}]
+
+const hightCitedList: LiteratureType[] = [{
+  name: '使用中资源量已损坏资源量',
+  value: 50000000
+},
+{
+  name: '已损坏资源量',
+  value: 120000000
+}]
 
 const GraphPage: React.FC = props => {
   type ExampleType = {
@@ -31,7 +82,6 @@ const GraphPage: React.FC = props => {
   const [queryValue, setQueryValue] = useState('')
   useEffect(() => {
     getGraphData()
-
   }, [])
 
   // 初始化示例数据
@@ -134,8 +184,8 @@ const GraphPage: React.FC = props => {
                       </Button>
                     )
                   }
+                  return ''
                 })}
-
               </section>
               <section className={css['subject-words']}>
                 {exampleList.map((item, index) => {
@@ -149,6 +199,8 @@ const GraphPage: React.FC = props => {
                         {item.entityName}
                       </Button>
                     )
+                  } else {
+                    return ''
                   }
                 })}
               </section>
@@ -173,7 +225,35 @@ const GraphPage: React.FC = props => {
             <span>实体134个</span>
           </div>
           <ExpertResume />
-          <LiteratureField />
+          <div className={css['literature-field']}>
+            <Title title='文献领域分布' />
+            <Pie data={literatureFieldList} canvasContainer='pieContainer' type='ring' />
+          </div>
+          <div className={css['journal-distribution']}>
+            <Title title='期刊分布' />
+            <Bar
+              width={370}
+              height={145}
+              data={journalDistributionList}
+              canvasContainer='barContainer' />
+          </div>
+          <div className={css['key-disciplines']}>
+            <Title title='重点学科匹配度' />
+            <Pie data={literatureFieldList} canvasContainer='simplePieContainer' />
+          </div>
+          <div className={css['high-cited']}>
+            <Title title='高被引占比' />
+            <Bar
+              width={370}
+              height={100}
+              data={hightCitedList}
+              canvasContainer='verticalBarContainer'
+              showYAxis={true}
+              showLegend={false}
+              barBorderRadius={30}
+              align='vertical'
+            />
+          </div>
         </section>
       </div>
 

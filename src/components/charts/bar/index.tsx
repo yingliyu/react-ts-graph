@@ -1,122 +1,233 @@
 import React, { useEffect } from 'react'
 import echarts from 'echarts'
-const Bar = () => {
+import { LiteratureType } from '../../../utils/constant'
+
+interface PropsType {
+  width: number
+  height: number
+  data: LiteratureType[]
+  canvasContainer: string
+  showYAxis?: boolean  // 是否显示y轴
+  showLegend?: boolean // 是否Legend
+  barBorderRadius?: number
+  align?: string // 垂直 or 水平柱状图
+}
+
+const Bar: React.FC<PropsType> = (props) => {
+  const { data, canvasContainer, barBorderRadius = 0, showYAxis = false, showLegend = true, width, height, align } = props
+
   useEffect(() => {
     drawBar()
   })
 
   const drawBar = () => {
-    const container = document.getElementById('container') as HTMLDivElement | HTMLCanvasElement
+    const container = document.getElementById(canvasContainer) as HTMLDivElement | HTMLCanvasElement
     // 基于准备好的dom，初始化echarts实例
     var myChart = echarts.init(container);
-
-    var dataStyle = {
-      normal: {
-        label: {
-          show: false
+    const nameArr = getArrayValue(data, 'name')
+    const valueArr = getArrayValue(data, 'value')
+    const salvProMax = new Array(nameArr.length).fill(Math.max(...valueArr))
+    const grid = {
+      left: "50%",
+      right: "4%",
+      bottom: "10%",
+      top: "10%",
+    }
+    const gridVertical = {
+      left: "30%",
+      right: "20%",
+      bottom: "10%",
+      top: "30%",
+      // containLabel: true
+    }
+    const seriesList: any = [
+      {
+        type: 'bar',
+        barWidth: '15',
+        zlevel: 2,
+        barGap: '150%',/*多个并排柱子设置柱子之间的间距*/
+        itemStyle: {
+          normal: {
+            barBorderRadius: barBorderRadius,
+            color: function (params: any) {
+              var colorList = ['#36CFC9', '#40A9FF', '#597EF7', '#9254DE', '#F759AB', '#FFA940'];
+              return colorList[params.dataIndex]
+            },
+          }
         },
-        labelLine: {
-          show: false
-        },
-        shadowBlur: 30,
-        shadowColor: 'rgba(40, 40, 40, 0.3)',
+        data: data
       }
-    };
+    ]
 
-    var placeHolderStyle = {
-      normal: {
-        color: 'rgba(0,0,0,0)',
-        label: {
-          show: false
-        },
-        labelLine: {
-          show: false
+    if (align === 'vertical') {
+      // 背景
+      seriesList.push({
+        name: '',
+        type: 'bar',
+        barWidth: 15,
+        barGap: '-100%',
+        data: salvProMax,
+        zlevel: 0,
+        itemStyle: {
+          normal: {
+            color: 'rgba(0,0,0,0.1)',
+            barBorderRadius: barBorderRadius,
+          }
         }
-      },
-      emphasis: {
-        color: 'rgba(0,0,0,0)'
-      }
-    };
+      })
+    } else {
+      seriesList.push({
+        data: data,
+        width: 0,
+        height: 0,
+        type: 'pie',
+        hoverAnimation: false,
+        labelLine: {
+          show: false,
+        },
+        itemStyle: {
+          normal: {
+            color: function (params: any) {
+              var colorList = ['#36CFC9', '#40A9FF', '#597EF7', '#9254DE', '#F759AB', '#FFA940'];
+              return colorList[params.dataIndex]
+            },
+          }
+        }
+      })
+    }
 
-    const option = {
-      color: ["#4C3CAE", "#8C0F86", "#CA2C95", "#E1A4C4", "#857ABA"],
-      tooltip: {
-        show: true,
-        formatter: "{a} <br/>{b} : {c} ({d}%)"
-      },
+    const option: any = {
       legend: {
-        itemGap: 12,
-        top: '10%',
+        show: showLegend,
+        type: 'scroll',
+        orient: 'vertical',
+        left: '3%',
+        top: 'center',
+        itemGap: 5,
+        selectedMode: true,
+        icon: 'pin',
+        formatter: function (name: any) {
+          var target;
+          var index;
+          let label = ''
+          if (name.length > 8) {
+            label = name.slice(0, 8) + '...';
+          } else {
+            label = name
+          }
+          for (var i = 0, l = option.series[0].data.length; i < l; i++) {
+            if (option.series[0].data[i].name === name) {
+              target = option.series[0].data[i].value;
+              index = i < 6 ? i : 5
+            }
+          }
+          return `{a| ${label}}{b${index}|     ${target}}`
+        },
+        tooltip: {
+          show: true
+        },
         textStyle: {
-          color: '#FE80C8',
-        },
-        data: ['01', '02', '03', '04', '05', '06']
-      },
-
-      series: [{
-        name: 'Line 1',
-        type: 'pie',
-        clockWise: false,
-        radius: [40, 50],
-        itemStyle: dataStyle,
-        hoverAnimation: false,
-        data: [{
-          value: 100,
-          name: '01'
-        },
-        {
-          value: 50,
-          name: 'invisible',
-          itemStyle: placeHolderStyle
+          rich: {
+            title: {
+              fontSize: 12,
+              lineHeight: 20,
+            },
+            value: {
+              fontSize: 14,
+              lineHeight: 20,
+            }
+          }
         }
 
-        ]
       },
-      {
-        name: 'Line 2',
-        type: 'pie',
-        clockWise: false,
-        radius: [30, 40],
-        itemStyle: dataStyle,
-        hoverAnimation: false,
-
-        data: [{
-          value: 50,
-          name: '02'
+      grid: align === 'vertical' ? gridVertical : grid,
+      tooltip: {
+        show: true
+      },
+      xAxis: {
+        show: false,
+        type: align === 'vertical' ? "value" : "category",
+        axisLabel: {
+          color: 'rgba(0,0,0,0.6)',
+          fontSize: '12'
+        },
+        axisLine: {
+          lineStyle: {
+            color: 'rgba(0,0,0,0)',
+          }
+        },
+        axisTick: {
+          show: false
+        },
+      },
+      yAxis: [
+        {
+          show: showYAxis,
+          type: align === 'vertical' ? "category" : "value",
+          textStyle: {
+            width: 0,
+          },
+          axisTick: {
+            show: false,
+          },
+          axisLabel: {
+            show: align === 'vertical' ? true : false,
+            formatter: function (value: any) {
+              var maxLength = 6;//每项显示文字个数  
+              var valLength = value.length;//X轴类目项的文字个数  
+              if (valLength > maxLength) {
+                var temp = "";//每次截取的字符串  
+                var start = 0;//开始截取的位置  
+                temp = value.substring(start, maxLength) + '...'
+                return temp;
+              } else {
+                return value;
+              }
+            },
+            textStyle: {
+              color: '#333'
+            }
+          },
+          axisLine: {
+            show: false
+          },
+          splitLine: {
+            show: false,
+          },
+          data: nameArr
         },
         {
-          value: 50,
-          name: 'invisible',
-          itemStyle: placeHolderStyle
+          show: showYAxis,
+          type: align === 'vertical' ? "category" : "value",
+          axisTick: 'none',
+          axisLine: 'none',
+          axisLabel: {
+            formatter: function (value: any) {
+              var maxLength = 6;//每项显示文字个数  
+              var valLength = value.length;//X轴类目项的文字个数  
+              if (valLength > maxLength) {
+                var temp = "";//每次截取的字符串  
+                var start = 0;//开始截取的位置  
+                temp = value.substring(start, maxLength) + '...'
+                return temp;
+              } else {
+                return value;
+              }
+            },
+            textStyle: {
+              color: '#333',
+              fontSize: '12'
+            },
+          },
+          data: valueArr
         }
-        ]
-      },
-      {
-        name: 'Line 3',
-        type: 'pie',
-        clockWise: false,
-        hoverAnimation: false,
-        radius: [20, 30],
-        itemStyle: dataStyle,
-
-        data: [{
-          value: 20,
-          name: '03'
-        },
-        {
-          value: 50,
-          name: 'invisible',
-          itemStyle: placeHolderStyle
-        }
-        ]
-      }
-      ]
+      ],
+      series: seriesList
     };
 
     // 使用刚指定的配置项和数据显示图表。
     myChart.setOption(option);
   }
-
   const getArrayValue = (array: any, key: any) => {
     var key = key || "value";
     var res: number[] = [];
@@ -127,112 +238,6 @@ const Bar = () => {
     }
     return res;
   }
-
-  const array2obj = (array: any, key: any) => {
-    var resObj: any = {};
-    for (var i = 0; i < array.length; i++) {
-      resObj[array[i][key]] = array[i];
-    }
-    return resObj;
-  }
-
-  const getData = (data: any, sumValue: any) => {
-
-    var res: any = {
-      series: [],
-      yAxis: []
-    };
-    for (let i = 0; i < data.length; i++) {
-      // console.log([70 - i * 15 + '%', 67 - i * 15 + '%']);
-      const seriesData = {
-        name: '',
-        type: 'pie',
-        clockWise: false, //顺时加载
-        hoverAnimation: false, //鼠标移入变大
-        radius: [73 - i * 15 + '%', 68 - i * 15 + '%'],
-        center: ["30%", "55%"],
-        label: {
-          show: false
-        },
-        itemStyle: {
-          label: {
-            show: false,
-          },
-          labelLine: {
-            show: false
-          },
-          borderWidth: 5,
-        },
-        data: [
-          {
-            value: data[i].value,
-            name: data[i].name
-          },
-          {
-            value: sumValue - data[i].value,
-            name: '',
-            itemStyle: {
-              color: "rgba(0,0,0,0)",
-              borderWidth: 0
-            },
-            tooltip: {
-              show: false
-            },
-            hoverAnimation: false
-          }]
-      }
-      res.series.push(seriesData);
-
-      res.series.push({
-        name: '',
-        type: 'pie',
-        silent: true,
-        z: 1,
-        clockWise: false, //顺时加载
-        hoverAnimation: false, //鼠标移入变大
-        radius: [73 - i * 15 + '%', 68 - i * 15 + '%'],
-        center: ["30%", "55%"],
-        label: {
-          show: false
-        },
-        itemStyle: {
-          label: {
-            show: false,
-          },
-          labelLine: {
-            show: false
-          },
-          borderWidth: 5,
-        },
-        data: [{
-          value: 7.5,
-          itemStyle: {
-            color: "rgb(3, 31, 62)",
-            borderWidth: 0
-          },
-          tooltip: {
-            show: false
-          },
-          hoverAnimation: false
-        }, {
-          value: 2.5,
-          name: '',
-          itemStyle: {
-            color: "rgba(0,0,0,0)",
-            borderWidth: 0
-          },
-          tooltip: {
-            show: false
-          },
-          hoverAnimation: false
-        }]
-      });
-
-      res.yAxis.push((data[i].value / sumValue * 100).toFixed(2) + "%");
-    }
-    return res;
-  }
-
-  return <div className='bar-wrapper' id='container' style={{ width: 370, height: 200 }}></div>
+  return <div className='bar-wrapper' id={canvasContainer} style={{ width: width, height: height }}></div>
 }
 export default Bar

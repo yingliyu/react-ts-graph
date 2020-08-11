@@ -11,8 +11,6 @@ const SubjectDistribution = () => {
 
   const drawWordCloud = () => {
     const wordElement = document.getElementById('wordCloud')
-    console.log(document.getElementById('wordCloud'));
-
     var chart = echarts.init(wordElement as HTMLDivElement);
 
     let keywords: any = {
@@ -363,17 +361,18 @@ const SubjectDistribution = () => {
       })
     }
 
-    var maskImage = new Image();
-    maskImage.src = logo
+    // var maskImage = new Image();
+    // maskImage.src = logo
+
     var option = {
       series: [{
         type: 'wordCloud',
-        sizeRange: [10, 50],
+        sizeRange: [12, 60],
         rotationRange: [-90, 90],
         rotationStep: 45,
         gridSize: 2,
         shape: 'pentagon',
-        maskImage: maskImage,
+        // maskImage: maskImage,
         textStyle: {
           normal: {
             color: function () {
