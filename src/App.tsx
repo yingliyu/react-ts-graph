@@ -2,32 +2,32 @@ import React from 'react';
 import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import css from './styles/app.module.less';
 import loadable from '@loadable/component';
-import Loading from './components/loading/index.jsx'
+import Loading from './components/loading/index.jsx';
 
 const Home = loadable(() => import('./pages/home'), {
-  fallback: <div>加载中...</div>,
+    fallback: <div>加载中...</div>
 });
 const Graph = loadable(() => import('./pages/graph'), {
-  fallback: <div>加载中...</div>,
+    fallback: <div>加载中...</div>
 });
 const NotFound = loadable(() => import('./pages/not-found'), {
-  fallback: <div>加载中...</div>,
+    fallback: <div>加载中...</div>
 });
 
 const App: React.FC = () => (
-  <div className={css.app}>
-    <Router>
-      <Switch>
-        <Route path="/" component={Home} exact={true} />
-        <Route path="/graph" component={Graph} exact={true} />
-        <Route path="/404" component={NotFound} exact={true} />
-        <Redirect to="/404" />
-      </Switch>
-    </Router>
-    <div id="loadingWrapper" className={css['loading-wrapper']}>
-      <Loading />
+    <div className={css.app}>
+        <Router>
+            <Switch>
+                <Route path="/" component={Home} exact={true} />
+                <Route path="/graph" component={Graph} exact={true} />
+                <Route path="/404" component={NotFound} exact={true} />
+                <Redirect to="/404" />
+            </Switch>
+        </Router>
+        <div id="loadingWrapper" className={css['loading-wrapper']}>
+            <Loading />
+        </div>
     </div>
-  </div>
 );
 
 export default App;

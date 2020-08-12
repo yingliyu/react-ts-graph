@@ -1,6 +1,6 @@
 import React from 'react'
 import css from './index.module.less'
-type TitleProps = {
+interface TitleProps {
   title: string
 }
 const Title = (props: TitleProps) => {

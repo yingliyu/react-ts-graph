@@ -3,7 +3,7 @@ import React, { useEffect } from 'react'
 import echarts from 'echarts'
 
 const EchartsGraph: React.FC = () => {
-  var plantCap = [{
+  let plantCap = [{
     name: '居住',
     value: 'Settlements'
   }, {
@@ -26,7 +26,7 @@ const EchartsGraph: React.FC = () => {
     value: 'industry'
   }];
 
-  var datalist = [{
+  let datalist = [{
     offset: [50, 50],
     symbolSize: 50,
     opacity: .95,
@@ -104,10 +104,10 @@ const EchartsGraph: React.FC = () => {
       color: '#ff8989'
     }]),
   }];
-  var datas = [];
-  for (var i = 0; i < plantCap.length; i++) {
-    var item = plantCap[i];
-    var itemToStyle = datalist[i];
+  let datas = [];
+  for (let i = 0; i < plantCap.length; i++) {
+    let item = plantCap[i];
+    let itemToStyle = datalist[i];
     datas.push({
       name: item.name + '\n' + item.value,
       value: itemToStyle.offset,
@@ -183,7 +183,7 @@ const EchartsGraph: React.FC = () => {
   const renderGraph = () => {
     const container = document.getElementById('effectScatter') as HTMLDivElement | HTMLCanvasElement
     // 基于准备好的dom，初始化echarts实例
-    var myChart = echarts.init(container);
+    let myChart = echarts.init(container);
     // 使用刚指定的配置项和数据显示图表。
     myChart.setOption(option);
   }
