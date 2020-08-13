@@ -41,7 +41,7 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
         rediusList: [120, 80, 60, 50, 40, 30],
         fontSizeList: [22, 18, 16, 14, 13, 12]
     };
-    const [, setSimulation] = useState<d3.Simulation<INode, ILink>>();
+    const [forceSimulation, setSimulation] = useState<d3.Simulation<INode, ILink>>();
     useEffect((): void => {
         if (linksData.length) {
             initSvg();
@@ -184,15 +184,17 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
             })
             .call(
                 d3.drag()
-                // .on('start', started)
-                // .on('end', ended)
-                // .on('drag', dragged)
-                // .on('end', ended)
+                // .on('start', started).on('end', ended).on('drag', dragged).on('end', ended)
+                // d3.drag().on('start', (node:INode,i:number.nodes:INode[])=>{
+                //     console.log(i,nodes,node)
+                // })
             )
+            .on('start', (d) => {
+                clickNodeHandle(d);
+            })
             .on('click', (d) => {
                 clickNodeHandle(d);
             });
-
         nodes
             .append('title')
             .attr('style', 'fill: red; stroke: cadetblue;')
@@ -229,8 +231,7 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
             .attr('class', 'node-text')
             .attr('width', '300px')
             .attr('fill', '#fff')
-            .attr('style', ({ level }) => {
-                console.log(level);
+            .attr('style', () => {
                 return `cursor: pointer;text-anchor: middle;dominant-baseline: middle;`;
             })
 
@@ -252,8 +253,8 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
             .attr('fill', '#f1f1f1')
             .attr('x', 0)
             .attr('y', (name, i, nodes) => {
-                console.log(name);
-
+                if (name) {
+                }
                 if (nodes.length === 1) {
                     return 0;
                 } else if (nodes.length === 2) {
@@ -309,8 +310,10 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
             .attr('fill-opacity', 0)
             .attr('stroke-opacity', 0)
             .attr('id', function (d, i) {
-                console.log(d);
-                return 'edgepath' + i;
+                if (d && i) {
+                    return 'edgepath' + i;
+                }
+                return '';
             })
             .style('pointer-events', 'none');
 
@@ -325,8 +328,10 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
             .attr('style', `pointer-events: none;font-size:12px;`)
             .attr('class', 'edgelabel')
             .attr('id', function (d, i) {
-                console.log(d);
-                return 'edgelabel' + i;
+                if (d && i) {
+                    return 'edgelabel' + i;
+                }
+                return '';
             })
             .attr('font-size', '24px')
             .attr('fill', '#ff7043')
@@ -334,9 +339,11 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
 
         edgelabels
             .append('textPath') // To render text along the shape of a <path>, enclose the text in a <textPath> element that has an href attribute with a reference to the <path> element.
-            .attr('xlink:href', function (i) {
-                // console.log(d);
-                return '#edgepath' + i;
+            .attr('xlink:href', function (d, i) {
+                if (d && i) {
+                    return '#edgepath' + i;
+                }
+                return '';
             })
             .style('text-anchor', 'middle')
             .style('pointer-events', 'none')
@@ -356,15 +363,14 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
         const edgeList = d3.selectAll('.edge');
         const relationLabels = d3.selectAll('.edgelabel');
         const currentEdges = linksData.filter(({ target }) => (target as INode).id === data.id);
-        console.log(currentEdges);
         const centerRelationName = currentEdges ? currentEdges[0].relType : ''; // 点击实体和中心词之间的关系
         edgeList.style('display', 'none');
         relationLabels.style('display', 'none');
 
         const selectNodeIds: string[] = [centerId];
-        // let temp: any = {}
+        // let temp: any = {};
         linksData.forEach(({ target, relType }) => {
-            // temp[relType] ? temp[relType]++ : temp[relType] = 1
+            // temp[relType] ? temp[relType]++ : (temp[relType] = 1);
             if (relType === centerRelationName) {
                 selectNodeIds.push((target as INode).id);
             }
@@ -387,17 +393,16 @@ const Graph: React.FC<IGraphProps> = (props: IGraphProps) => {
         labelFilter.style('display', '');
     };
 
-    // const started: (d: any) => any = (d: any) => {
-    //     if (d) {
-    //         if (!d3.event.active) {
-    //             (forceSimulation as d3.Simulation<INode, ILink>).alphaTarget(0.3).restart();
-    //         }
-    //         d3.event.sourceEvent.stopPropagation();
-    //         d.fx = d.x;
-    //         d.fy = d.y;
-    //     }
-    //     return d;
-    // };
+    const started = (d: INode): void => {
+        if (d) {
+            if (!d3.event.active) {
+                (forceSimulation as d3.Simulation<INode, ILink>).alphaTarget(0.3).restart();
+            }
+            d3.event.sourceEvent.stopPropagation();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+    };
 
     // const dragged: (d: any) => void = (d: any) => {
     //     if (d) {

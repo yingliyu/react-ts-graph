@@ -4,7 +4,7 @@ import EchartsGraph from '../../components/charts/graph';
 // import EffectScatter from '../../components/charts/effect-scatter';
 import { baseApi, expertApi } from '../../services';
 import css from './index.module.less';
-import { Input, Radio, Button } from 'antd';
+import { Select, Radio, Button, Spin } from 'antd';
 import ExpertInfo from './components/expert-info';
 import SubjectDistribution from './components/subject-distribution';
 import ExpertResume from './components/expert-resume';
@@ -13,7 +13,8 @@ import Title from './components/title';
 import { LiteratureType } from '../../utils/constant';
 import Pie from '../../components/charts/pie';
 import Bar from '../../components/charts/bar';
-
+import debounce from 'lodash.debounce';
+const { Option } = Select;
 let examplePage = 1;
 
 const literatureFieldList: LiteratureType[] = [
@@ -77,17 +78,18 @@ const GraphPage: React.FC = (props) => {
         orgId: string;
         orgName: string;
     }
-
     const exampleDefault: ExampleType[] = [];
     const [exampleList, setExampleList] = useState(exampleDefault);
     const [activeExampleId, seActiveExampleId] = useState('0');
     const [showExample, setShowExample] = useState(false);
+    const [suggestList, setSuggestList] = useState([]);
+    const [showSuggestWords, setShowSuggestWords] = useState(false);
     const [graphData, setGraphData] = useState();
     const [activeGraph, setActiveGraph] = useState(0);
-    const [queryValue, setQueryValue] = useState('');
+    const [queryValue, setQueryValue] = useState([]);
     useEffect(() => {
         getGraphData();
-    }, []);
+    }, [queryValue]);
 
     // 获取示例数据
     const getExamplesData = async () => {
@@ -116,13 +118,32 @@ const GraphPage: React.FC = (props) => {
         }
     };
 
-    const inputChangeHandle = (event: any): void => {
-        event.persist();
-        setQueryValue(event.target.value);
+    const inputSearchHandle = (value: any): void => {
+        setShowSuggestWords(true);
+        getSuggestWords(value);
     };
 
-    const inputSearchHandle = (val: any) => {
-        console.log('search keyword===', val);
+    const getSuggestWords = async (val: string) => {
+        try {
+            const res = await baseApi.getSuggestWords({ word: val });
+
+            const data = res.map((item: any) => ({
+                text: `${item.entityName} ${item.orgName ? item.orgName : ''}`,
+                value: item.entityId + '_' + item.orgId
+            }));
+
+            setShowSuggestWords(false);
+            setSuggestList(data);
+        } catch (error) {
+            setShowSuggestWords(false);
+        }
+    };
+
+    debounce(getSuggestWords, 800);
+
+    const inputChangeHandle = (value: any) => {
+        console.log('search keyword===', value);
+        setQueryValue(value);
     };
 
     const showExampleHandle = () => {
@@ -169,18 +190,27 @@ const GraphPage: React.FC = (props) => {
                 </section>
                 <div className={css['main-wrapper']}>
                     <div className={css['search-wrapper']}>
-                        <Input.Search
+                        <Select
+                            // labelInValue
+                            maxTagCount={1}
+                            mode="tags"
                             value={queryValue}
-                            placeholder="请您输入您所要查询的内容"
-                            onChange={(e) => inputChangeHandle(e)}
+                            placeholder="请输入搜索词并在下拉菜单选择知识图谱"
+                            notFoundContent={showSuggestWords ? <Spin size="small" /> : null}
+                            filterOption={false}
                             onSearch={(value) => inputSearchHandle(value)}
+                            onChange={(e: any) => inputChangeHandle(e)}
                             style={{ width: 480, height: 50 }}
-                            loading={false}
-                            maxLength={100}
-                        />
+                        >
+                            {suggestList.map((item: any) => (
+                                <Option key={item.value}>{item.text}</Option>
+                            ))}
+                        </Select>
+
                         <span className={css['example-btn']} onClick={showExampleHandle}>
                             示例
                         </span>
+                        {/* 所有示例 */}
                         <div
                             className={[
                                 `${css['examples-wrapper']}`,
