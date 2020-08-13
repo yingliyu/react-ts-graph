@@ -135,10 +135,13 @@ const Bar: React.FC<PropsType> = (props) => {
                     let target;
                     let index;
                     let label = '';
-                    if (name.length > 8) {
+                    const maxLength = 8;
+                    const maxAllLen = 15;
+                    if (name.length > maxLength) {
                         label = name.slice(0, 8) + '...';
+                        label = label.padEnd(maxAllLen, ' ');
                     } else {
-                        label = name;
+                        label = name.padEnd(maxAllLen, ' ');
                     }
                     for (let i = 0, l = option.series[0].data.length; i < l; i++) {
                         if (option.series[0].data[i].name === name) {
@@ -233,6 +236,7 @@ const Bar: React.FC<PropsType> = (props) => {
                                 let temp = ''; // 每次截取的字符串
                                 let start = 0; // 开始截取的位置
                                 temp = value.substring(start, maxLength) + '...';
+                                temp = temp.padEnd(7, ' ');
                                 return temp;
                             } else {
                                 return value;

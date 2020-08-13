@@ -188,7 +188,7 @@ const GraphPage: React.FC = (props) => {
                             ].join(' ')}
                         >
                             <section className={css['expert-words']}>
-                                {exampleList.map((item) => {
+                                {exampleList.map((item, index) => {
                                     if (item.entityType === 'EXPERT') {
                                         return (
                                             <Button
@@ -197,7 +197,7 @@ const GraphPage: React.FC = (props) => {
                                                         ? css['active']
                                                         : ''
                                                 }
-                                                key={item.entityName}
+                                                key={item.entityName + '_' + index}
                                                 onClick={() => exampleClickHandle(item)}
                                             >
                                                 {item.entityName}
@@ -208,7 +208,7 @@ const GraphPage: React.FC = (props) => {
                                 })}
                             </section>
                             <section className={css['subject-words']}>
-                                {exampleList.map((item) => {
+                                {exampleList.map((item, index) => {
                                     if (item.entityType === 'SUBJECT') {
                                         return (
                                             <Button
@@ -217,7 +217,7 @@ const GraphPage: React.FC = (props) => {
                                                         ? css['active']
                                                         : ''
                                                 }
-                                                key={item.entityName}
+                                                key={item.entityName + '_' + index}
                                                 onClick={() => exampleClickHandle(item)}
                                             >
                                                 {item.entityName}

@@ -82,8 +82,9 @@ const Pie: React.FC<PropsType> = (props) => {
                     let maxLength = 6; // 每项显示文字个数
                     if (name.length > maxLength) {
                         label = name.slice(0, maxLength) + '...';
+                        label = label.padEnd(10, ' ');
                     } else {
-                        label = name;
+                        label = name.padEnd(10, ' ');
                     }
                     return '{title|' + label + '}           {value|' + objData[name].value + '} ';
                 },
