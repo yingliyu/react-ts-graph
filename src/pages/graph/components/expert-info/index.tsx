@@ -5,9 +5,9 @@ const ExpertInfo = () => {
     return (
         <div className={css['expert-info']}>
             <div className={css['expert-head']}>
-                <section>
+                <div className={css['expert-head-wrapper']}>
                     <img src={expertImg} alt="专家头像" />
-                </section>
+                </div>
                 <span>钟南山</span>
                 <span>zhongnanshan</span>
                 <span>机构名称</span>

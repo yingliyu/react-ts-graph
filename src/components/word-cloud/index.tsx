@@ -1,49 +1,29 @@
 import React, { useEffect } from 'react';
-import css from './index.module.less';
-import Title from '../title';
 import 'echarts-wordcloud';
 import echarts from 'echarts';
-// import logo from './imgs/logo.png';
-const SubjectDistribution = () => {
+import { ICommonProps } from '../../utils/constant';
+
+interface IWordCloud {
+    list: ICommonProps[];
+}
+
+const WordCloud: React.FC<IWordCloud> = (props: IWordCloud) => {
+    const { list } = props;
     useEffect(() => {
+        console.log(props);
         drawWordCloud();
     }, []);
-
-    const keywords: {
-        [prop: string]: number;
-    } = {
-        showTitle: 484,
-        dataView: 2754,
-        restore: 932,
-        timeline: 10104,
-        range: 477,
-        value: 5732,
-        precision: 878,
-        target: 1433,
-        zlevel: 5361,
-        symbol: 8718,
-        interval: 7964,
-        symbolSize: 5300,
-        showSymbol: 1247,
-        inside: 8913,
-        xAxisIndex: 3843,
-        orient: 4205,
-        boundaryGap: 5073,
-        nameGap: 4896,
-        zoomLock: 571,
-        hoverAnimation: 2307,
-        legendHoverLink: 3553
-    };
 
     const drawWordCloud = () => {
         const wordElement = document.getElementById('wordCloud');
         let chart = echarts.init(wordElement as HTMLDivElement);
 
         let data = [];
-        for (let name in keywords) {
+
+        for (let index in list) {
             data.push({
-                name: name,
-                value: Math.sqrt(keywords[name])
+                name: list[index].name,
+                value: Math.sqrt(list[index].value)
             });
         }
 
@@ -51,14 +31,26 @@ const SubjectDistribution = () => {
         // maskImage.src = logo
 
         let option = {
+            tooltips: {
+                show: true,
+                formatter: (item: any) => {
+                    console.log(item);
+                }
+            },
             series: [
                 {
                     type: 'wordCloud',
-                    sizeRange: [16, 20],
+                    left: 'center',
+                    top: 'center',
+                    width: '90%',
+                    height: '90%',
+                    right: null,
+                    bottom: null,
+                    sizeRange: [12, 30],
                     rotationRange: [-90, 90],
                     rotationStep: 45,
-                    gridSize: 2,
-                    shape: 'pentagon',
+                    gridSize: 8,
+                    shape: 'star',
                     // maskImage: maskImage,
                     textStyle: {
                         normal: {
@@ -75,7 +67,7 @@ const SubjectDistribution = () => {
                             }
                         }
                     },
-                    data: data.sort(function (a, b) {
+                    data: data.sort(function (a: any, b: any) {
                         return b.value - a.value;
                     })
                 }
@@ -84,15 +76,7 @@ const SubjectDistribution = () => {
         chart.setOption(option);
     };
 
-    return (
-        <div className={css['subject-distribution']}>
-            <Title title="学科分布" />
-            <div
-                id="wordCloud"
-                style={{ height: 230, width: 400, position: 'relative', left: '-20px' }}
-            />
-        </div>
-    );
+    return <div id="wordCloud" style={{ height: 230, width: 370 }} />;
 };
 
-export default SubjectDistribution;
+export default WordCloud;

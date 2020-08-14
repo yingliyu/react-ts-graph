@@ -27,7 +27,8 @@ instance.interceptors.request.use(
         if (!reqList.includes(request)) {
             reqList.push(request);
         }
-        showLoading();
+        config.url !== '/aikg/data-service/search/suggest' && showLoading();
+
         // Do something before request is sent
         // Loading 为单例模式
         // Loading.service({

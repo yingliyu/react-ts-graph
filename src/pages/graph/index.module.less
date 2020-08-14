@@ -23,6 +23,18 @@
             padding: 0 15px;
             .search-wrapper {
                 position: relative;
+                :global .ant-select-selection--multiple,
+                :global .ant-select-selection--multiple .ant-select-selection__rendered,
+                :global .ant-select-selection__rendered > ul > li {
+                    height: 50px;
+                    line-height: 50px;
+                    box-sizing: border-box;
+                }
+                :global .ant-select-selection--multiple .ant-select-selection__choice {
+                    background-color: transparent;
+                    border: none;
+                    margin: 0;
+                }
                 .example-btn {
                     color: #1890ff;
                     text-decoration: underline;
@@ -38,7 +50,6 @@
                 }
                 .examples-wrapper {
                     width: 500px;
-                    // min-height: 400px;
                     position: absolute;
                     right: 285px;
                     top: 65px;
@@ -58,7 +69,7 @@
                         border-bottom: 8px solid #fff;
                         position: absolute;
                         right: 20px;
-                        top: -16px;
+                        top: -15px;
                     }
                     section {
                         :global .ant-btn {
@@ -114,66 +125,30 @@
                     }
                 }
             }
+            section {
+                width: 100%;
+                background-color: #fff;
+                margin-bottom: 10px;
+            }
+        }
+        .aside-left-wrapper {
+            .subject-distribution {
+                height: 260px;
+            }
         }
         .aside-right-wrapper {
             .literature-field {
-                width: 100%;
                 height: 180px;
-                background-color: #fff;
-                margin-bottom: 10px;
             }
             .journal-distribution {
-                width: 100%;
                 height: 180px;
-                background-color: #fff;
-                margin-bottom: 10px;
             }
             .key-disciplines {
-                width: 100%;
                 height: 180px;
-                background-color: #fff;
-                margin-bottom: 10px;
             }
             .high-cited {
-                width: 100%;
                 height: 140px;
-                background-color: #fff;
-                margin-bottom: 10px;
             }
         }
     }
 }
-// 示例modal
-// :global .ant-modal-body {
-//   padding: 10px;
-//   section {
-//     :global .ant-btn {
-//       margin-bottom: 5px;
-//     }
-//     .active {
-//       color: #1890ff;
-//       border-color: #1890ff;
-//     }
-//   }
-//   &:before {
-//     content: '';
-//     width: 0;
-//     height: 0;
-//     border: 8px solid transparent;
-//     border-bottom: 8px solid #fff;
-//     position: absolute;
-//     right: 30px;
-//     top: -15px;
-//   }
-//   :global .ant-btn {
-//     margin-right: 5px;
-//   }
-//   footer {
-//     width: 100%;
-//     bottom: 2px;
-//     right: 0;
-//     text-align: right;
-//     padding-top: 7px;
-//     border-top: 1px solid #eee;
-//   }
-// }
