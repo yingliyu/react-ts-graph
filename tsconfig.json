@@ -16,9 +16,6 @@
         "jsx": "react",
         "outDir": "./dist",
         "sourceMap": true
-        // "plugins": [{ "name": "typescript-tslint-plugin" }],
-        // "noUnusedLocals": true,
-        // "noUnusedParameters": true
     },
     "include": ["src"]
 }

@@ -1,50 +1,64 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import css from './index.module.less';
-// import graphData from './data';
 import * as d3 from 'd3';
-import { INode, ILink } from '../../utils/constant';
-interface IGraphProps {
-    title?: string;
-    entities: INode[];
-    relations: ILink[];
-    expertId: string;
-}
+import { INode, ILink, IGraphProps } from '../../utils/constant';
 
 const Graph: React.FC<IGraphProps> = (props, {}) => {
-    const { expertId: centerId, entities: nodesData, relations: linksData } = props;
+    const {
+        expertId: centerId,
+        entities: nodesData,
+        relations: linksData,
+        svgWidth,
+        svgHeight
+    } = props;
+
     const simulationRef = useRef<d3.Simulation<INode, ILink>>();
+    const edgeText = useRef();
 
     const svgData = {
         top: 20,
-        right: 20,
-        bottom: 20,
         left: 20,
-        svgW: 900,
-        svgH: 900,
         // colorList: ['#967adc', '#8cc152', '#3bafda', '#f6bb42', '#37bc9b', '#ff7e90', '#ff7043'],
-        colorList: ['#00e5c1', '#fdc765', '#23cbff', '#2f83e4'],
-        rediusList: [120, 80, 60, 50, 40, 30],
+        colorList: ['#2f83e4', '#ff7e90', '#23cbff', '#00e5c1'],
+        rediusList: [150, 80, 60, 50, 40, 30],
         fontSizeList: [22, 18, 16, 14, 13, 12]
     };
+    const [graphTypes, setGraphTypes] = useState<string[]>([]);
+    const [clickedNodeId, setClickedNodeId] = useState<string>();
 
     useEffect((): void => {
+        d3.selectAll('svg').remove();
         if (linksData && linksData.length) {
             initSvg();
             initForceSimulation();
+            getGraphTypes();
         }
     }, [linksData]);
 
+    useEffect(() => {
+        setEdgeTextBg();
+    }, [clickedNodeId]);
+    const setEdgeTextBg = () => {};
     // init SVG
     const initSvg = () => {
         d3.select('#graph-container')
             .append('svg')
-            .attr('width', svgData.svgW)
-            .attr('height', svgData.svgH)
+            .attr('width', svgWidth)
+            .attr('height', svgHeight)
             .append('g')
             .attr('transform', `translate(${svgData.top}, ${svgData.left})`);
     };
 
-    // drag start
+    const getGraphTypes = () => {
+        let types = new Set();
+        nodesData.forEach((item: any) => {
+            types.add(item.type);
+        });
+        const typesArr = Array.from(types) as string[];
+        setGraphTypes(typesArr);
+    };
+
+    // drag start event
     const started = (d: INode) => {
         !d3.event.active &&
             simulationRef &&
@@ -55,13 +69,13 @@ const Graph: React.FC<IGraphProps> = (props, {}) => {
         d.fy = d.y;
     };
 
-    // drag
+    // drag event
     const dragged = (d: INode) => {
         d.fx = d3.event.x;
         d.fy = d3.event.y;
     };
 
-    // drag end
+    // drag end event
     const ended = (d: INode) => {
         !d3.event.active &&
             simulationRef &&
@@ -71,18 +85,47 @@ const Graph: React.FC<IGraphProps> = (props, {}) => {
         d.fy = null;
     };
 
-    // set color
+    //  set color
     const dynamicColor = (type: any) => {
         switch (type) {
-            case 'talent':
+            case 'EXPERT':
                 return svgData.colorList[0];
-            case 'journal':
+            case 'JOURNAL':
                 return svgData.colorList[1];
-            case 'organization':
+            case 'ORG':
                 return svgData.colorList[2];
+            case 'PROJECT':
+                return svgData.colorList[3];
             default:
                 return svgData.colorList[3];
         }
+    };
+
+    // set text position Y
+    const setNodeTextPosition = (name: string, i: number, nodes: any) => {
+        if (name) {
+        }
+        if (nodes.length === 1) {
+            return 0;
+        } else if (nodes.length === 2) {
+            if (i === 0) {
+                return '-0.5em';
+            } else if (i === 1) {
+                return '0.5em';
+            }
+        } else if (nodes.length >= 3) {
+            switch (i) {
+                case 0:
+                    return '-0.8em';
+                case 1:
+                    return '0.3em';
+                case 2:
+                    return '1.2em';
+                default:
+                    return '-99999em';
+            }
+        }
+        return '';
     };
 
     // draw relation lines
@@ -97,11 +140,10 @@ const Graph: React.FC<IGraphProps> = (props, {}) => {
             .enter()
             .append('line')
             .attr('class', 'edge')
-            .attr('stroke', 'rgba(0,0,0,0.3)')
-            .attr('stroke-width', '1px')
+            .attr('stroke', (d: any) => dynamicColor(d.target.type))
+            .attr('stroke-width', '2px')
             .style('display', 'none');
         // edges.append('title').text((data) => data.label);
-
         return edges;
     };
 
@@ -116,9 +158,7 @@ const Graph: React.FC<IGraphProps> = (props, {}) => {
             .enter()
             .append('g')
             .attr('class', 'node')
-            .attr('name', (data) => {
-                return data.name;
-            })
+            .attr('name', (data) => data.name)
             .call(
                 d3
                     .drag<SVGGElement, INode>()
@@ -127,29 +167,14 @@ const Graph: React.FC<IGraphProps> = (props, {}) => {
                     .on('drag', dragged)
                     .on('end', ended)
             )
-            .on('start', (d) => {
-                clickNodeHandle(d);
-            })
-            .on('click', (d) => {
-                clickNodeHandle(d);
-            });
-        nodes
-            .append('title')
-            .attr('style', 'fill: red; stroke: cadetblue;')
-            .text((data) => {
-                return data.name;
-            });
+            .on('click', (d) => clickNodeHandle(d));
+
+        nodes.append('title').text((data) => data.name);
 
         nodes
             .append('circle')
             .attr('class', 'circle-element')
-            .attr('r', (d: INode) => {
-                if (d.id === centerId) {
-                    return 60;
-                } else {
-                    return 40;
-                }
-            })
+            .attr('r', (d: INode) => (d.id === centerId ? 80 : 40))
             .attr('fill', (d: INode) => dynamicColor(d.type))
             .attr('style', 'cursor: pointer;');
 
@@ -158,10 +183,7 @@ const Graph: React.FC<IGraphProps> = (props, {}) => {
             .attr('class', 'node-text')
             .attr('width', '300px')
             .attr('fill', '#fff')
-            .attr('style', () => {
-                return `cursor: pointer;text-anchor: middle;dominant-baseline: middle;`;
-            })
-
+            .attr('style', `cursor: pointer;text-anchor: middle;dominant-baseline: middle;`)
             .append('tspan')
             .selectAll('tspan')
             .data(({ name }) => {
@@ -179,45 +201,14 @@ const Graph: React.FC<IGraphProps> = (props, {}) => {
             .join('tspan')
             .attr('fill', '#f1f1f1')
             .attr('x', 0)
-            .attr('y', (name, i, nodes) => {
-                if (name) {
-                }
-                if (nodes.length === 1) {
-                    return 0;
-                } else if (nodes.length === 2) {
-                    if (i === 0) {
-                        return '-0.5em';
-                    } else if (i === 1) {
-                        return '0.5em';
-                    }
-                } else if (nodes.length >= 3) {
-                    if (i === 0) {
-                        return '-0.8em';
-                    } else if (i === 1) {
-                        return '0.3em';
-                    } else if (i === 2) {
-                        return '1.2em';
-                    } else {
-                        return '-999em';
-                    }
-                }
-                return '';
-            })
+            .attr('y', (name, i, nodes) => setNodeTextPosition(name, i, nodes))
             .text((name) => {
                 const reg = /[A-Za-z]/i;
                 const isEnglishName = reg.test(name);
                 if (isEnglishName) {
-                    if (name.length > 8) {
-                        return `${name.slice(0, 8)}...`;
-                    } else {
-                        return name;
-                    }
+                    return name.length > 8 ? `${name.slice(0, 8)}...` : name;
                 } else {
-                    if (name.length > 2) {
-                        return `${name.slice(0, 2)}${name.slice(2, 5)}`;
-                    } else {
-                        return name;
-                    }
+                    return name.length > 2 ? `${name.slice(0, 2)}${name.slice(2, 5)}` : name;
                 }
             });
         return nodes;
@@ -236,12 +227,7 @@ const Graph: React.FC<IGraphProps> = (props, {}) => {
             .attr('class', 'edgepath')
             .attr('fill-opacity', 0)
             .attr('stroke-opacity', 0)
-            .attr('id', function (d, i) {
-                if (d && i) {
-                    return 'edgepath' + i;
-                }
-                return '';
-            })
+            .attr('id', (d, i) => d && 'edgepath' + i)
             .style('pointer-events', 'none');
 
         const edgelabels = d3
@@ -250,38 +236,47 @@ const Graph: React.FC<IGraphProps> = (props, {}) => {
             .attr('class', 'tagLabels')
             .selectAll('.edgelabel')
             .data(linksData)
-            .enter()
+            .enter();
+
+        const edgeTextFilter = edgelabels
+            .append('filter')
+            .attr('width', '1')
+            .attr('height', '20px')
+            .attr('x', '0')
+            .attr('y', '0')
+            .attr('rx', '5')
+            .attr('ry', '5')
+            .attr('id', (d, i) => d && 'edgepath_' + i);
+
+        edgeTextFilter
+            .append('feFlood')
+            // .attr('flood-color', (d: any) => dynamicColor(d.target.type))
+            .attr('flood-color', 'orange');
+
+        edgeTextFilter.append('feComposite').attr('in', 'SourceGraphic').attr('operator', 'xor');
+
+        const edgeText = edgelabels
             .append('text')
-            .attr('style', `pointer-events: none;font-size:16px;font-weight:bold`)
+            .attr('style', `pointer-events: none;font-size:16px;`)
             .attr('class', 'edgelabel')
-            .attr('id', function (d, i) {
-                if (d && i) {
-                    return 'edgelabel' + i;
-                }
-                return '';
-            })
-            .attr('font-size', '24px')
-            .attr('fill', '#999')
+            .attr('id', (d, i) => d && 'edgelabel' + i)
+            .attr('fill', (d: any) => dynamicColor(d.target.type))
             .style('display', 'none');
 
-        edgelabels
+        const textPath = edgeText
             .append('textPath') // To render text along the shape of a <path>, enclose the text in a <textPath> element that has an href attribute with a reference to the <path> element.
-            .attr('xlink:href', function (d, i) {
-                if (d && i) {
-                    return '#edgepath' + i;
-                }
-                return '';
-            })
+            .attr('xlink:href', (d, i) => d && '#edgepath' + i)
             .style('text-anchor', 'middle')
             .style('pointer-events', 'none')
-            .attr('startOffset', '50%')
+            .attr('startOffset', '60%')
+            .attr('filter', (d, i) => d && 'url(#edgepath_' + i + ')')
             .text(({ relType }) => relType || '');
-
         return edgepaths;
     };
 
     // 专家关系图谱实体点击事件
     const clickNodeHandle = (data: INode) => {
+        setClickedNodeId(data.id);
         // 中心词只显示浮层信息
         if (data.id === centerId) return;
         // 和中心词的关系
@@ -289,10 +284,13 @@ const Graph: React.FC<IGraphProps> = (props, {}) => {
         nodeList.style('opacity', 0.2);
         const edgeList = d3.selectAll('.edge');
         const relationLabels = d3.selectAll('.edgelabel');
-        const currentEdges = linksData.filter(({ target }) => (target as INode).id === data.id);
-        const centerRelationName = currentEdges ? currentEdges[0].relType : ''; // 点击实体和中心词之间的关系
+        const relationLabelsBg = d3.selectAll('filter');
         edgeList.style('display', 'none');
         relationLabels.style('display', 'none');
+        relationLabelsBg.attr('display', 'none');
+
+        const currentEdges = linksData.filter(({ target }) => (target as INode).id === data.id);
+        const centerRelationName = currentEdges ? currentEdges[0].relType : ''; // 点击实体和中心词之间的关系
 
         const selectNodeIds: string[] = [centerId];
         // let temp: any = {};
@@ -314,7 +312,12 @@ const Graph: React.FC<IGraphProps> = (props, {}) => {
         const labelFilter = relationLabels.filter((item) => {
             return (item as ILink).relType === centerRelationName;
         });
+        // 关系标签背景色
+        const labelBgFilter = relationLabelsBg.filter((item: any) => {
+            return (item.target as INode).id === data.id;
+        });
 
+        labelBgFilter.attr('display', '');
         nodesFilter.style('opacity', 1);
         edgeFilter.style('display', '');
         labelFilter.style('display', '');
@@ -347,7 +350,7 @@ const Graph: React.FC<IGraphProps> = (props, {}) => {
             .force('link', linkForce) // 映射id & 线的长度
             .force('x', d3.forceX())
             .force('y', d3.forceY())
-            .force('center', d3.forceCenter(svgData.svgW / 2, svgData.svgH / 2))
+            .force('center', d3.forceCenter(svgWidth / 2, svgHeight / 2))
             // 避免节点相互覆盖
             .force('collision', nodeCollision)
             // 节点间相互排斥的电磁力
@@ -379,9 +382,38 @@ const Graph: React.FC<IGraphProps> = (props, {}) => {
         const edgepaths = drawEdgeLabel();
     };
 
+    const getLegendByType = (type: string) => {
+        switch (type) {
+            case 'EXPERT':
+                return '专家';
+            case 'ORG':
+                return '机构';
+            case 'JOURNAL':
+                return '期刊';
+            case 'SUBJECT':
+                return '学科词';
+            case 'PAPER':
+                return '论文';
+            case 'PATENT':
+                return '专利';
+                dafault: return '项目';
+        }
+    };
     return (
         <div className={css['graph-wrapper']}>
+            {/* 图谱容器 */}
             <section id="graph-container" />
+            {/* 图谱小示例 */}
+            <ul className={css['legend-wrapper']}>
+                {graphTypes &&
+                    graphTypes.length &&
+                    graphTypes.map((item: any) => (
+                        <li key={item}>
+                            <i style={{ background: dynamicColor(item) }} />
+                            {getLegendByType(item)}
+                        </li>
+                    ))}
+            </ul>
         </div>
     );
 };

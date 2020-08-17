@@ -26,8 +26,12 @@ const ExpertInfo = () => {
                     <b>1213323</b>
                 </li>
                 <li>
-                    <span>前1%高被引：</span>
-                    <b>4.91%</b>
+                    <span>
+                        前1%高
+                        <br />
+                        &nbsp;&nbsp;被引数：
+                    </span>
+                    <b>94.91%</b>
                 </li>
             </ul>
         </div>

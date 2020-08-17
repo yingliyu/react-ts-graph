@@ -12,8 +12,8 @@
     .container {
         width: 100%;
         height: calc(100vh - 60px);
-        background: rgba(0, 0, 0, 0.1);
-        padding: 25px 15px 15px;
+        background: #f3f6f9;
+        padding: 25px 18px 18px;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -21,6 +21,7 @@
             min-width: 1150px;
             height: 100%;
             padding: 0 15px;
+            position: relative;
             .search-wrapper {
                 position: relative;
                 :global .ant-select-selection--multiple,
@@ -100,7 +101,10 @@
                 }
             }
             .toggle-btn-group {
+                position: absolute;
                 text-align: left;
+                padding-left: 20px;
+                padding-top: 20px;
                 :global .ant-radio-button-wrapper-checked {
                     background: #1890ff;
                     color: #fff;
@@ -118,8 +122,8 @@
                     background: #fff;
                     border-radius: 5px;
                     width: 180px;
-                    height: 45px;
-                    line-height: 45px;
+                    height: 48px;
+                    line-height: 48px;
                     &:first-child {
                         margin-right: 10px;
                     }
@@ -128,12 +132,15 @@
             section {
                 width: 100%;
                 background-color: #fff;
-                margin-bottom: 10px;
+                margin-bottom: 12px;
             }
         }
         .aside-left-wrapper {
             .subject-distribution {
-                height: 260px;
+                height: 265px;
+            }
+            .hotwords-distribution {
+                height: 280px;
             }
         }
         .aside-right-wrapper {
@@ -147,7 +154,7 @@
                 height: 180px;
             }
             .high-cited {
-                height: 140px;
+                height: 142px;
             }
         }
     }

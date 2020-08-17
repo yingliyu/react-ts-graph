@@ -27,3 +27,12 @@ export interface IExampleData {
     orgId: string;
     orgName: string;
 }
+
+export interface IGraphProps {
+    title?: string;
+    entities: INode[];
+    relations: ILink[];
+    expertId: string;
+    svgWidth: number;
+    svgHeight: number;
+}

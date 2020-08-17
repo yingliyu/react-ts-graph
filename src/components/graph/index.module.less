@@ -1,18 +1,37 @@
 .graph-wrapper {
-  // background: rgba(0, 0, 0, 0.4);
-  overflow: hidden;
-  .fulltext {
-    display: none;
-    span {
-      background: #ccc;
+    // background: rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    .fulltext {
+        display: none;
+        span {
+            background: #ccc;
+        }
     }
-  }
-  .text-wrapper {
-    cursor: pointer;
-    &:hover {
-      .fulltext span {
-        display: block;
-      }
+    .text-wrapper {
+        cursor: pointer;
+        &:hover {
+            .fulltext span {
+                display: block;
+            }
+        }
     }
-  }
+    .legend-wrapper {
+        position: absolute;
+        bottom: 40px;
+        left: 40px;
+        li {
+            text-align: left;
+            line-height: 30px;
+            position: relative;
+            padding-left: 20px;
+            i {
+                display: block;
+                position: absolute;
+                left: 0;
+                top: 8px;
+                width: 14px;
+                height: 14px;
+            }
+        }
+    }
 }

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 
 import css from './index.module.less';
-import { Select, Radio, Button, Spin, Icon } from 'antd';
+import { Select, Radio, Button, Spin, Icon, message } from 'antd';
 import Title from './components/title';
 import ExpertInfo from './components/expert-info';
 // import WordCloud from '../../components/word-cloud';
 import ExpertResume from './components/expert-resume';
 import Graph from '../../components/graph';
-import EchartsGraph from '../../components/charts/graph';
+// import EchartsGraph from '../../components/charts/graph/index';
 // import Pie from '../../components/charts/pie';
 // import Bar from '../../components/charts/bar';
 import debounce from 'lodash.debounce';
@@ -86,6 +86,7 @@ const GraphPage: React.FC = (props) => {
     const [graphData, setGraphData] = useState();
     const [activeGraph, setActiveGraph] = useState(0);
     const [queryValue, setQueryValue] = useState([]);
+    const [graphTypes, setGraphTypes] = useState<string[]>([]);
 
     useEffect(() => {
         getGraphData();
@@ -106,22 +107,32 @@ const GraphPage: React.FC = (props) => {
     // 获取图谱数据-例如:人工智能
     const getGraphData = async () => {
         try {
-            const queryObj: any = suggestInfo.list.filter(
-                (item: any) => item.entityName === queryValue[0]
-            );
-            /*{
-            "entityId": "9629e6f710354de888dde8e201be80e0",
-            "entityName": "Seregin Vadim"
-            }*/
-            const params: any = {
-                entityId:
-                    queryObj.length && queryObj
-                        ? queryObj[0].entityId
-                        : '9629e6f710354de888dde8e201be80e0',
-                entityName: queryObj.length && queryObj ? queryObj[0].entityName : 'Seregin Vadim'
-            };
-            const res = await expertApi.getExpertGraph(params);
-            setGraphData(res);
+            if (queryValue.length) {
+                const queryKeys: string = queryValue[0];
+                // const params = {
+                //     entityId: 'f7c1fd353bb04c949ef1747e96ca76ed',
+                //     entityName: 'Seregin Vadim'
+                // };
+                const params: any = {
+                    entityId: queryKeys.split('_')[1],
+                    entityName: queryKeys.split('_')[0]
+                };
+                const res = await expertApi.getExpertGraph(params);
+                setGraphData(res);
+            } else {
+                const params = {
+                    entityId: 'f7c1fd353bb04c949ef1747e96ca76ed',
+                    entityName: 'Seregin Vadim'
+                };
+                const res = await expertApi.getExpertGraph(params);
+                setGraphData(res);
+                let types = new Set();
+                res.entities.forEach((item: any) => {
+                    types.add(item.type);
+                });
+                const typesArr = Array.from(types) as string[];
+                setGraphTypes(typesArr);
+            }
         } catch (error) {
             console.log(error);
         }
@@ -160,6 +171,7 @@ const GraphPage: React.FC = (props) => {
 
     // 点击联想词之后触发的查询事件
     const selectSuggestWordHandle = (value: any) => {
+        console.log(value);
         setSuggestInfo({
             list: suggestInfo.list,
             loading: false,
@@ -192,6 +204,10 @@ const GraphPage: React.FC = (props) => {
 
     // 切换图谱类型
     const toggleGraphHandle = () => {
+        if (activeGraph === 0) {
+            message.info('敬请期待');
+            return;
+        }
         setActiveGraph(activeGraph === 0 ? 1 : 0);
     };
 
@@ -289,7 +305,7 @@ const GraphPage: React.FC = (props) => {
                 >
                     <div className={css['statistics-wrapper']}>
                         <span>实体134个</span>
-                        <span>实体134个</span>
+                        <span>关系10034种</span>
                     </div>
                     {/* 专家基本信息 */}
                     <ExpertInfo />
@@ -297,12 +313,13 @@ const GraphPage: React.FC = (props) => {
                         <Title title="学科分布" />
                         {/* <WordCloud list={wordCloudList} /> */}
                     </section>
-                    <section>
+                    <section className={css['hotwords-distribution']}>
                         <Title title="热词分布" />
-                        <EchartsGraph />
+                        {/* <EchartsGraph /> */}
                     </section>
                 </div>
                 <div className={css['main-wrapper']}>
+                    {/* 搜索模块 start */}
                     <div className={css['search-wrapper']}>
                         <Select
                             showSearch={true}
@@ -320,11 +337,13 @@ const GraphPage: React.FC = (props) => {
                             defaultActiveFirstOption={true}
                             suffixIcon={<Icon type="search" />}
                         >
-                            {suggestInfo.list.map((item: any) => (
-                                <Option key={item.entityName}>
-                                    {item.entityName + (item.orgName ? ' ' + item.orgName : '')}
-                                </Option>
-                            ))}
+                            {suggestInfo.list &&
+                                suggestInfo.list.length &&
+                                suggestInfo.list.map((item: any, index) => (
+                                    <Option key={item.entityName + '_' + item.entityId}>
+                                        {item.entityName + (item.orgName ? ' ' + item.orgName : '')}
+                                    </Option>
+                                ))}
                         </Select>
 
                         <span className={css['example-btn']} onClick={showExampleHandle}>
@@ -386,6 +405,8 @@ const GraphPage: React.FC = (props) => {
                             </div>
                         </div>
                     </div>
+                    {/* 搜索模块 end */}
+
                     <div className={css['toggle-btn-group']}>
                         <Radio.Group value={activeGraph} onChange={toggleGraphHandle}>
                             <Radio.Button value={0}>关系图谱</Radio.Button>
@@ -393,7 +414,7 @@ const GraphPage: React.FC = (props) => {
                         </Radio.Group>
                     </div>
                     {/* 知识图谱 */}
-                    <Graph {...graphData} {...props} />
+                    <Graph {...graphData} {...props} svgWidth={1100} svgHeight={910} />
                 </div>
                 <div
                     className={[`${css['aside-right-wrapper']}`, `${css['aside-wrapper']}`].join(
@@ -401,8 +422,8 @@ const GraphPage: React.FC = (props) => {
                     )}
                 >
                     <div className={css['statistics-wrapper']}>
-                        <span>实体134个</span>
-                        <span>实体134个</span>
+                        <span>文献134篇</span>
+                        <span>科研项目134个</span>
                     </div>
                     {/* 专家履历 */}
                     <ExpertResume />
