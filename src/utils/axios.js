@@ -27,7 +27,12 @@ instance.interceptors.request.use(
         if (!reqList.includes(request)) {
             reqList.push(request);
         }
-        config.url !== '/aikg/data-service/search/suggest' && showLoading();
+        if (
+            config.url !== '/aikg/data-service/search/suggest' &&
+            config.url !== '/aikg/data-service/search/getExamples'
+        ) {
+            showLoading();
+        }
 
         // Do something before request is sent
         // Loading 为单例模式

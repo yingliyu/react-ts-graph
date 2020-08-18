@@ -2,14 +2,14 @@ import React, { useEffect, useState, useRef } from 'react';
 import css from './index.module.less';
 import * as d3 from 'd3';
 import { INode, ILink, IGraphProps } from '../../utils/constant';
-
+import { message } from 'antd';
 const Graph: React.FC<IGraphProps> = (props, {}) => {
     const {
         expertId: centerId,
         entities: nodesData,
         relations: linksData,
-        svgWidth,
-        svgHeight
+        svgWidth = 1100,
+        svgHeight = 900
     } = props;
 
     const simulationRef = useRef<d3.Simulation<INode, ILink>>();
@@ -27,7 +27,7 @@ const Graph: React.FC<IGraphProps> = (props, {}) => {
     const [clickedNodeId, setClickedNodeId] = useState<string>();
 
     useEffect((): void => {
-        d3.selectAll('svg').remove();
+        d3.selectAll('section svg').remove();
         if (linksData && linksData.length) {
             initSvg();
             initForceSimulation();
@@ -183,7 +183,13 @@ const Graph: React.FC<IGraphProps> = (props, {}) => {
             .attr('class', 'node-text')
             .attr('width', '300px')
             .attr('fill', '#fff')
-            .attr('style', `cursor: pointer;text-anchor: middle;dominant-baseline: middle;`)
+            .attr(
+                'style',
+                (d) =>
+                    `cursor: pointer;text-anchor: middle;dominant-baseline: middle;font-size:${
+                        d.id === centerId ? '24px' : '14px'
+                    }`
+            )
             .append('tspan')
             .selectAll('tspan')
             .data(({ name }) => {
@@ -225,6 +231,7 @@ const Graph: React.FC<IGraphProps> = (props, {}) => {
             .enter()
             .append('path')
             .attr('class', 'edgepath')
+            .attr('name', (d: any) => d.relType || '')
             .attr('fill-opacity', 0)
             .attr('stroke-opacity', 0)
             .attr('id', (d, i) => d && 'edgepath' + i)
@@ -236,41 +243,53 @@ const Graph: React.FC<IGraphProps> = (props, {}) => {
             .attr('class', 'tagLabels')
             .selectAll('.edgelabel')
             .data(linksData)
-            .enter();
+            .enter()
+            .append('g')
+            .attr('name', (d: any) => d.relType || '')
+            .attr('class', 'edgeslabel-group')
+            .attr('style', 'cursor: pointer;')
+            .on('click', (d) => message.warning(d.relType + '关系'));
 
-        const edgeTextFilter = edgelabels
-            .append('filter')
-            .attr('width', '1')
-            .attr('height', '20px')
-            .attr('x', '0')
-            .attr('y', '0')
-            .attr('rx', '5')
-            .attr('ry', '5')
-            .attr('id', (d, i) => d && 'edgepath_' + i);
+        edgelabels.append('title').text((data) => data.relType);
 
-        edgeTextFilter
-            .append('feFlood')
-            // .attr('flood-color', (d: any) => dynamicColor(d.target.type))
-            .attr('flood-color', 'orange');
+        // 文字背景
+        // const edgeTextFilter = edgelabels
+        //     .append('filter')
+        //     .attr('name', (d: any) => d.relType || '')
+        //     .attr('width', '1')
+        //     .attr('height', '1')
+        //     .attr('x', '0')
+        //     .attr('y', '0')
+        //     .attr('style', 'cursor: pointer;')
+        //     .attr('class', 'filter')
+        //     .attr('id', (d, i) => d && 'edgefilter_' + i)
+        //     .on('click', (d) => console.log(d.relType + '关系'));
 
-        edgeTextFilter.append('feComposite').attr('in', 'SourceGraphic').attr('operator', 'xor');
+        // edgeTextFilter.append('feFlood').attr('flood-color', 'orange').attr('flood-opacity', '1');
+
+        // edgeTextFilter
+        //     .append('feComposite')
+        //     .attr('in', 'SourceGraphic')
+        //     .attr('operator', 'lighter');
 
         const edgeText = edgelabels
             .append('text')
-            .attr('style', `pointer-events: none;font-size:16px;`)
+            .attr('style', `font-size:18px;`)
             .attr('class', 'edgelabel')
             .attr('id', (d, i) => d && 'edgelabel' + i)
             .attr('fill', (d: any) => dynamicColor(d.target.type))
-            .style('display', 'none');
+            .attr('style', 'cursor: pointer;display:none');
 
         const textPath = edgeText
             .append('textPath') // To render text along the shape of a <path>, enclose the text in a <textPath> element that has an href attribute with a reference to the <path> element.
             .attr('xlink:href', (d, i) => d && '#edgepath' + i)
             .style('text-anchor', 'middle')
             .style('pointer-events', 'none')
-            .attr('startOffset', '60%')
-            .attr('filter', (d, i) => d && 'url(#edgepath_' + i + ')')
+            .attr('startOffset', '50%')
+            // .attr('filter', (d, i) => d && 'url(#edgefilter_' + i + ')')
+            .attr('style', 'cursor: pointer;font-size:18px;font-weight:bold')
             .text(({ relType }) => relType || '');
+
         return edgepaths;
     };
 
@@ -284,10 +303,11 @@ const Graph: React.FC<IGraphProps> = (props, {}) => {
         nodeList.style('opacity', 0.2);
         const edgeList = d3.selectAll('.edge');
         const relationLabels = d3.selectAll('.edgelabel');
-        const relationLabelsBg = d3.selectAll('filter');
+        // const relationLabelsBg = d3.selectAll('feFlood');
+
         edgeList.style('display', 'none');
         relationLabels.style('display', 'none');
-        relationLabelsBg.attr('display', 'none');
+        // relationLabelsBg.attr('flood-opacity', '0');
 
         const currentEdges = linksData.filter(({ target }) => (target as INode).id === data.id);
         const centerRelationName = currentEdges ? currentEdges[0].relType : ''; // 点击实体和中心词之间的关系
@@ -312,15 +332,16 @@ const Graph: React.FC<IGraphProps> = (props, {}) => {
         const labelFilter = relationLabels.filter((item) => {
             return (item as ILink).relType === centerRelationName;
         });
-        // 关系标签背景色
-        const labelBgFilter = relationLabelsBg.filter((item: any) => {
-            return (item.target as INode).id === data.id;
-        });
 
-        labelBgFilter.attr('display', '');
+        // 关系标签背景色
+        // const labelBgFilter = relationLabelsBg.filter((item: any) => {
+        //     return (item.target as INode).id === data.id;
+        // });
+
         nodesFilter.style('opacity', 1);
         edgeFilter.style('display', '');
         labelFilter.style('display', '');
+        // labelBgFilter.attr('flood-opacity', 1);
     };
 
     // create a force simulation

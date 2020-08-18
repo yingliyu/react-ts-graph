@@ -10,8 +10,7 @@ const path = require('path');
 function resolve(dir) {
     return path.join(__dirname, '.', dir);
 }
-console.log('==========');
-console.log(resolve(__dirname, 'src'));
+
 const config = override(
     // antd按需加载
     fixBabelImports('import', {

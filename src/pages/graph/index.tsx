@@ -13,7 +13,7 @@ import Graph from '../../components/graph';
 import debounce from 'lodash.debounce';
 import { baseApi, expertApi } from '../../services';
 
-import { LiteratureType, ICommonProps, IExampleData } from '../../utils/constant';
+import { LiteratureType, ICommonProps, IExampleData, IGraphProps } from '../../utils/constant';
 
 const { Option } = Select;
 let examplePage = 1;
@@ -74,8 +74,9 @@ const hightCitedList: LiteratureType[] = [
 const GraphPage: React.FC = (props) => {
     const exampleDefault: IExampleData[] = [];
     const [exampleList, setExampleList] = useState(exampleDefault);
-    const [activeExampleId, seActiveExampleId] = useState('0');
+    const [activeExampleId, setActiveExampleId] = useState('0');
     const [showExample, setShowExample] = useState(false);
+    const [search, setSearch] = useState([]);
 
     const [suggestInfo, setSuggestInfo] = useState({
         list: [],
@@ -83,13 +84,16 @@ const GraphPage: React.FC = (props) => {
         showModal: false
     });
 
-    const [graphData, setGraphData] = useState();
+    const [graphData, setGraphData] = useState<IGraphProps>();
     const [activeGraph, setActiveGraph] = useState(0);
-    const [queryValue, setQueryValue] = useState([]);
+    const [queryValue, setQueryValue] = useState({
+        entityId: 'f7c1fd353bb04c949ef1747e96ca76ed',
+        entityName: '李飞飞'
+    });
     const [graphTypes, setGraphTypes] = useState<string[]>([]);
 
     useEffect(() => {
-        getGraphData();
+        queryValue.entityId && getGraphData();
     }, [queryValue]);
 
     // 获取示例数据
@@ -107,32 +111,14 @@ const GraphPage: React.FC = (props) => {
     // 获取图谱数据-例如:人工智能
     const getGraphData = async () => {
         try {
-            if (queryValue.length) {
-                const queryKeys: string = queryValue[0];
-                // const params = {
-                //     entityId: 'f7c1fd353bb04c949ef1747e96ca76ed',
-                //     entityName: 'Seregin Vadim'
-                // };
-                const params: any = {
-                    entityId: queryKeys.split('_')[1],
-                    entityName: queryKeys.split('_')[0]
-                };
-                const res = await expertApi.getExpertGraph(params);
-                setGraphData(res);
-            } else {
-                const params = {
-                    entityId: 'f7c1fd353bb04c949ef1747e96ca76ed',
-                    entityName: 'Seregin Vadim'
-                };
-                const res = await expertApi.getExpertGraph(params);
-                setGraphData(res);
-                let types = new Set();
-                res.entities.forEach((item: any) => {
-                    types.add(item.type);
-                });
-                const typesArr = Array.from(types) as string[];
-                setGraphTypes(typesArr);
-            }
+            const res = await expertApi.getExpertGraph(queryValue);
+            setGraphData(res);
+            let types = new Set();
+            res.entities.forEach((item: any) => {
+                types.add(item.type);
+            });
+            const typesArr = Array.from(types) as string[];
+            setGraphTypes(typesArr);
         } catch (error) {
             console.log(error);
         }
@@ -140,16 +126,18 @@ const GraphPage: React.FC = (props) => {
 
     // 监听输入框值改变后去获取关联list
     const inputSearchHandle = (value: any): void => {
+        console.log(value);
+
         setSuggestInfo({
-            list: suggestInfo.list,
-            loading: true,
+            ...suggestInfo,
             showModal: true
         });
-        getSuggestWords(value);
+        fetchSuggest(value);
     };
 
     // 获取关联list数据
     const getSuggestWords = async (val: string) => {
+        if (!val) return;
         try {
             const res = await baseApi.getSuggestWords({ word: val });
             setSuggestInfo({
@@ -167,17 +155,21 @@ const GraphPage: React.FC = (props) => {
     };
 
     // 防抖、节流
-    debounce(getSuggestWords, 800);
+    const fetchSuggest = debounce(getSuggestWords, 800);
 
     // 点击联想词之后触发的查询事件
     const selectSuggestWordHandle = (value: any) => {
         console.log(value);
         setSuggestInfo({
-            list: suggestInfo.list,
-            loading: false,
+            ...suggestInfo,
             showModal: false
         });
-        setQueryValue(value);
+        const queryKeys: string = value.length ? value[0] : '';
+        const params: any = {
+            entityId: queryKeys.split('_')[1],
+            entityName: queryKeys.split('_')[0]
+        };
+        setQueryValue(params);
     };
 
     // 显示示例
@@ -190,10 +182,16 @@ const GraphPage: React.FC = (props) => {
         }
     };
 
-    // 示例点击事件
+    // 示例点击
     const exampleClickHandle = (item: IExampleData): void => {
         console.log('click ok===', item);
-        seActiveExampleId(item.entityId);
+        setActiveExampleId(item.entityId);
+        const params = {
+            entityId: item.entityId,
+            entityName: item.entityName
+        };
+        setQueryValue(params);
+        setShowExample(false);
     };
 
     // 示例分页
@@ -205,7 +203,7 @@ const GraphPage: React.FC = (props) => {
     // 切换图谱类型
     const toggleGraphHandle = () => {
         if (activeGraph === 0) {
-            message.info('敬请期待');
+            message.info('即将上线，敬请期待！');
             return;
         }
         setActiveGraph(activeGraph === 0 ? 1 : 0);
@@ -298,6 +296,7 @@ const GraphPage: React.FC = (props) => {
         <div className={css['graph-page-wrapper']}>
             <h2>上海人工智能研发资源图谱</h2>
             <div className={css['container']}>
+                {/* left aside */}
                 <div
                     className={[`${css['aside-left-wrapper']}`, `${css['aside-wrapper']}`].join(
                         ' '
@@ -322,34 +321,34 @@ const GraphPage: React.FC = (props) => {
                     {/* 搜索模块 start */}
                     <div className={css['search-wrapper']}>
                         <Select
-                            showSearch={true}
-                            value={queryValue}
-                            mode="multiple"
-                            open={suggestInfo.showModal}
+                            showSearch
                             placeholder="请输入搜索词并在下拉菜单选择知识图谱"
                             notFoundContent={
                                 suggestInfo.loading ? <Spin size="small" /> : '无关联知识图谱'
                             }
                             filterOption={false}
-                            onSearch={(value) => inputSearchHandle(value)}
+                            onSearch={(value) => fetchSuggest(value)}
                             onChange={(value: any) => selectSuggestWordHandle(value)}
                             style={{ width: 480, height: 50 }}
-                            defaultActiveFirstOption={true}
                             suffixIcon={<Icon type="search" />}
                         >
-                            {suggestInfo.list &&
-                                suggestInfo.list.length &&
+                            {suggestInfo.list.length &&
                                 suggestInfo.list.map((item: any, index) => (
-                                    <Option key={item.entityName + '_' + item.entityId}>
+                                    <Option
+                                        key={item.entityId}
+                                        value={JSON.stringify({
+                                            entityName: item.entityName,
+                                            entityId: item.entityId
+                                        })}
+                                    >
                                         {item.entityName + (item.orgName ? ' ' + item.orgName : '')}
                                     </Option>
                                 ))}
                         </Select>
-
                         <span className={css['example-btn']} onClick={showExampleHandle}>
                             示例
                         </span>
-                        {/* 所有示例 */}
+                        {/* 展示所有示例 */}
                         <div
                             className={[
                                 `${css['examples-wrapper']}`,
@@ -358,43 +357,19 @@ const GraphPage: React.FC = (props) => {
                         >
                             <section className={css['expert-words']}>
                                 {exampleList.map((item, index) => {
-                                    if (item.entityType === 'EXPERT') {
-                                        return (
-                                            <Button
-                                                className={
-                                                    item.entityId === activeExampleId
-                                                        ? css['active']
-                                                        : ''
-                                                }
-                                                key={item.entityName + '_' + index}
-                                                onClick={() => exampleClickHandle(item)}
-                                            >
-                                                {item.entityName}
-                                            </Button>
-                                        );
-                                    }
-                                    return '';
-                                })}
-                            </section>
-                            <section className={css['subject-words']}>
-                                {exampleList.map((item, index) => {
-                                    if (item.entityType === 'SUBJECT') {
-                                        return (
-                                            <Button
-                                                className={
-                                                    item.entityId === activeExampleId
-                                                        ? css['active']
-                                                        : ''
-                                                }
-                                                key={item.entityName + '_' + index}
-                                                onClick={() => exampleClickHandle(item)}
-                                            >
-                                                {item.entityName}
-                                            </Button>
-                                        );
-                                    } else {
-                                        return '';
-                                    }
+                                    return (
+                                        <Button
+                                            className={
+                                                item.entityId === activeExampleId
+                                                    ? css['active']
+                                                    : ''
+                                            }
+                                            key={item.entityName + '_' + index}
+                                            onClick={() => exampleClickHandle(item)}
+                                        >
+                                            {item.entityName}
+                                        </Button>
+                                    );
                                 })}
                             </section>
                             <div className={css['example-footer']}>
@@ -414,7 +389,14 @@ const GraphPage: React.FC = (props) => {
                         </Radio.Group>
                     </div>
                     {/* 知识图谱 */}
-                    <Graph {...graphData} {...props} svgWidth={1100} svgHeight={910} />
+                    {graphData && graphData.relations.length ? (
+                        <Graph {...graphData} {...props} svgWidth={1100} svgHeight={910} />
+                    ) : (
+                        <p className={css['no-graph-desc']}>
+                            未搜索到与<i>{queryValue.entityName}</i>
+                            相关的知识谱图数据，换一个词试试吧！
+                        </p>
+                    )}
                 </div>
                 <div
                     className={[`${css['aside-right-wrapper']}`, `${css['aside-wrapper']}`].join(
