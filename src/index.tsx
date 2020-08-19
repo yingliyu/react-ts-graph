@@ -1,11 +1,16 @@
+// import 'core-js';
+// import 'core-js/es/map';
+// import 'core-js/es/set';
+import 'regenerator-runtime/runtime';
+import 'react-app-polyfill/ie9';
+import 'react-app-polyfill/stable';
+import 'raf/polyfill';
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './app';
 
-import 'core-js';
-import 'regenerator-runtime/runtime';
 import './styles/index.less';
-
 // import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(<App />, document.getElementById('root'));

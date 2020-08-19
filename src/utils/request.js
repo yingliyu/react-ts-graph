@@ -2,7 +2,7 @@ import instance from './axios';
 import { message } from 'antd';
 import qs from 'qs';
 message.config({
-    top: 20,
+    top: 40,
     duration: 1,
     maxCount: 1
 });

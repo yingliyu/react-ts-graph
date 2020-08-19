@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-
+import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import css from './index.module.less';
 import { Select, Radio, Button, Spin, Icon, message } from 'antd';
 import Title from './components/title';
@@ -13,8 +13,9 @@ import Graph from '../../components/graph';
 import debounce from 'lodash.debounce';
 import { baseApi, expertApi } from '../../services';
 
-import { LiteratureType, ICommonProps, IExampleData, IGraphProps } from '../../utils/constant';
-
+import { IGraphComponentProps } from '../../models/graph';
+import { ICommonProps } from '../../models/global';
+import { LiteratureType, IExampleData } from '../../models/search';
 const { Option } = Select;
 let examplePage = 1;
 
@@ -71,7 +72,25 @@ const hightCitedList: LiteratureType[] = [
     }
 ];
 
-const GraphPage: React.FC = (props) => {
+interface IGraphProps {
+    history: {
+        push: any;
+    };
+    location: {
+        search: string;
+    };
+}
+const useQuery = () => {
+    return new URLSearchParams(useLocation().search);
+};
+const GraphPage: React.FC<IGraphProps> = (props) => {
+    console.log(props);
+    const queryStr = useQuery();
+    const selectValue = queryStr.get('q');
+    const selectedId = queryStr.get('id');
+    console.log(selectValue);
+    console.log(selectedId);
+
     const exampleDefault: IExampleData[] = [];
     const [exampleList, setExampleList] = useState(exampleDefault);
     const [activeExampleId, setActiveExampleId] = useState('0');
@@ -80,17 +99,34 @@ const GraphPage: React.FC = (props) => {
 
     const [suggestInfo, setSuggestInfo] = useState({
         list: [],
-        loading: false,
-        showModal: false
+        loading: false
     });
-
-    const [graphData, setGraphData] = useState<IGraphProps>();
+    const refSelect = useRef<any>();
+    const [graphData, setGraphData] = useState<IGraphComponentProps>();
     const [activeGraph, setActiveGraph] = useState(0);
-    const [queryValue, setQueryValue] = useState({
+    /*{
         entityId: 'f7c1fd353bb04c949ef1747e96ca76ed',
-        entityName: '李飞飞'
+        entityName: '李飞飞',
+        orgId: '12'
+    }*/
+    const [queryValue, setQueryValue] = useState({
+        entityId: '',
+        entityName: '',
+        orgId: ''
     });
     const [graphTypes, setGraphTypes] = useState<string[]>([]);
+
+    useEffect(() => {
+        selectedId &&
+            selectValue &&
+            setQueryValue({
+                entityId: selectedId,
+                entityName: selectValue,
+                orgId: '_'
+            });
+        refSelect && refSelect.current && refSelect.current.focus();
+        inputSearchHandle(selectValue);
+    }, []);
 
     useEffect(() => {
         queryValue.entityId && getGraphData();
@@ -110,9 +146,18 @@ const GraphPage: React.FC = (props) => {
 
     // 获取图谱数据-例如:人工智能
     const getGraphData = async () => {
+        props.history.push(`/graph?q=${queryValue.entityName}&id=${queryValue.entityId}`);
+        if (!queryValue.orgId) {
+            message.warn('当前版本仅支持搜索专家，换一个专家试试吧！');
+            return;
+        }
         try {
             const res = await expertApi.getExpertGraph(queryValue);
+            console.log(res);
+
             setGraphData(res);
+            console.log(graphData);
+
             let types = new Set();
             res.entities.forEach((item: any) => {
                 types.add(item.type);
@@ -124,13 +169,13 @@ const GraphPage: React.FC = (props) => {
         }
     };
 
-    // 监听输入框值改变后去获取关联list
+    // 关联监听输入框值change handle(获取关联下拉list)
     const inputSearchHandle = (value: any): void => {
         console.log(value);
 
         setSuggestInfo({
             ...suggestInfo,
-            showModal: true
+            loading: true
         });
         fetchSuggest(value);
     };
@@ -142,14 +187,12 @@ const GraphPage: React.FC = (props) => {
             const res = await baseApi.getSuggestWords({ word: val });
             setSuggestInfo({
                 list: res,
-                loading: false,
-                showModal: true
+                loading: false
             });
         } catch (error) {
             setSuggestInfo({
-                list: suggestInfo.list,
-                loading: false,
-                showModal: suggestInfo.showModal
+                ...suggestInfo,
+                loading: false
             });
         }
     };
@@ -157,25 +200,21 @@ const GraphPage: React.FC = (props) => {
     // 防抖、节流
     const fetchSuggest = debounce(getSuggestWords, 800);
 
-    // 点击联想词之后触发的查询事件
+    // 选中（学科词/专家）后触发的查询事件
     const selectSuggestWordHandle = (value: any) => {
-        console.log(value);
-        setSuggestInfo({
-            ...suggestInfo,
-            showModal: false
-        });
-        const queryKeys: string = value.length ? value[0] : '';
-        const params: any = {
-            entityId: queryKeys.split('_')[1],
-            entityName: queryKeys.split('_')[0]
-        };
+        const params: any = JSON.parse(value);
+        console.log(params);
+        if (!params.orgId) {
+            message.warn('当前版本仅支持搜索专家，换一个专家试试吧！');
+            return;
+        }
         setQueryValue(params);
     };
 
     // 显示示例
     const showExampleHandle = () => {
         if (!showExample) {
-            examplePage = 1;
+            // examplePage = 1;
             getExamplesData();
         } else {
             setShowExample(false);
@@ -188,8 +227,13 @@ const GraphPage: React.FC = (props) => {
         setActiveExampleId(item.entityId);
         const params = {
             entityId: item.entityId,
-            entityName: item.entityName
+            entityName: item.entityName,
+            orgId: item.orgId
         };
+        if (!params.orgId) {
+            message.warn('当前版本仅支持搜索专家，换一个专家试试吧！');
+            return;
+        }
         setQueryValue(params);
         setShowExample(false);
     };
@@ -303,8 +347,8 @@ const GraphPage: React.FC = (props) => {
                     )}
                 >
                     <div className={css['statistics-wrapper']}>
-                        <span>实体134个</span>
-                        <span>关系10034种</span>
+                        <span>实体{graphData && graphData.entityTotal}个</span>
+                        <span>关系{graphData && graphData.relationTotal}个</span>
                     </div>
                     {/* 专家基本信息 */}
                     <ExpertInfo />
@@ -321,7 +365,10 @@ const GraphPage: React.FC = (props) => {
                     {/* 搜索模块 start */}
                     <div className={css['search-wrapper']}>
                         <Select
+                            ref={refSelect}
                             showSearch
+                            autoFocus={true}
+                            value={selectValue ? selectValue : queryValue.entityName}
                             placeholder="请输入搜索词并在下拉菜单选择知识图谱"
                             notFoundContent={
                                 suggestInfo.loading ? <Spin size="small" /> : '无关联知识图谱'
@@ -329,8 +376,9 @@ const GraphPage: React.FC = (props) => {
                             filterOption={false}
                             onSearch={(value) => fetchSuggest(value)}
                             onChange={(value: any) => selectSuggestWordHandle(value)}
-                            style={{ width: 480, height: 50 }}
-                            suffixIcon={<Icon type="search" />}
+                            style={{ width: 480, height: 48 }}
+                            showArrow={false}
+                            defaultActiveFirstOption={true}
                         >
                             {suggestInfo.list.length &&
                                 suggestInfo.list.map((item: any, index) => (
@@ -338,7 +386,8 @@ const GraphPage: React.FC = (props) => {
                                         key={item.entityId}
                                         value={JSON.stringify({
                                             entityName: item.entityName,
-                                            entityId: item.entityId
+                                            entityId: item.entityId,
+                                            orgId: item.orgId
                                         })}
                                     >
                                         {item.entityName + (item.orgName ? ' ' + item.orgName : '')}
@@ -347,6 +396,7 @@ const GraphPage: React.FC = (props) => {
                         </Select>
                         <span className={css['example-btn']} onClick={showExampleHandle}>
                             示例
+                            <Icon key="search_icon" className={css['search-icon']} type="search" />
                         </span>
                         {/* 展示所有示例 */}
                         <div
@@ -394,7 +444,7 @@ const GraphPage: React.FC = (props) => {
                     ) : (
                         <p className={css['no-graph-desc']}>
                             未搜索到与<i>{queryValue.entityName}</i>
-                            相关的知识谱图数据，换一个词试试吧！
+                            相关的知识谱图，换一个词试试吧！
                         </p>
                     )}
                 </div>
@@ -404,8 +454,8 @@ const GraphPage: React.FC = (props) => {
                     )}
                 >
                     <div className={css['statistics-wrapper']}>
-                        <span>文献134篇</span>
-                        <span>科研项目134个</span>
+                        <span>文献134xx篇</span>
+                        <span>科研项目134xxx个</span>
                     </div>
                     {/* 专家履历 */}
                     <ExpertResume />

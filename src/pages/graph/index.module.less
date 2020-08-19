@@ -23,30 +23,33 @@
             padding: 0 15px;
             position: relative;
             .no-graph-desc {
-                padding: 15px;
+                padding: 20px;
                 i {
                     color: #1890ff;
                 }
             }
             .search-wrapper {
                 position: relative;
-                :global .ant-select-selection--multiple,
-                :global .ant-select-selection--multiple .ant-select-selection__rendered,
-                :global .ant-select-selection__rendered > ul > li {
-                    height: 50px;
-                    line-height: 50px;
+                :global .ant-select-selection--single,
+                :global .ant-select-selection__rendered {
+                    height: 48px;
+                    line-height: 48px;
                     box-sizing: border-box;
                 }
-                :global .ant-select-selection--multiple .ant-select-selection__choice {
-                    background-color: transparent;
-                    border: none;
-                    margin: 0;
-                }
+
                 .example-btn {
                     color: #1890ff;
                     text-decoration: underline;
                     padding-left: 10px;
                     cursor: pointer;
+                    position: relative;
+                    .search-icon {
+                        position: absolute;
+                        left: -35px;
+                        top: -3px;
+                        font-size: 26px;
+                        color: #d1d1d1;
+                    }
                 }
                 .suggests-wrapper {
                     width: 480px;

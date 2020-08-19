@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import echarts from 'echarts';
-import { LiteratureType } from '../../../utils/constant';
+import { LiteratureType } from '../../../models/search';
 
 interface PropsType {
     width: number;

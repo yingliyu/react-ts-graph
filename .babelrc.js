@@ -6,20 +6,28 @@ module.exports = {
             '@babel/react',
             {
                 targets: {
-                    ie: '11'
+                    ie: '10'
                 }
             }
         ],
         [
             '@babel/preset-env',
             {
-                useBuiltIns: 'entry'
+                useBuiltIns: 'entry',
+                corejs: 3,
+                proposals: true
             }
         ]
     ],
     plugins: [
         'add-module-exports',
         '@babel/plugin-transform-typescript',
-        '@babel/plugin-transform-runtime'
+        [
+            '@babel/plugin-transform-runtime'
+            // {
+            //     corejs: 3,
+            //     proposals: true
+            // }
+        ]
     ]
 };

@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import css from './index.module.less';
 import * as d3 from 'd3';
-import { INode, ILink, IGraphProps } from '../../utils/constant';
+import { INode, ILink, IGraphComponentProps } from '../../models/graph';
 import { message } from 'antd';
-const Graph: React.FC<IGraphProps> = (props, {}) => {
+const Graph: React.FC<IGraphComponentProps> = (props, {}) => {
     const {
         expertId: centerId,
         entities: nodesData,
@@ -141,7 +141,7 @@ const Graph: React.FC<IGraphProps> = (props, {}) => {
             .append('line')
             .attr('class', 'edge')
             .attr('stroke', (d: any) => dynamicColor(d.target.type))
-            .attr('stroke-width', '2px')
+            .attr('stroke-width', '1.5px')
             .style('display', 'none');
         // edges.append('title').text((data) => data.label);
         return edges;
@@ -287,7 +287,7 @@ const Graph: React.FC<IGraphProps> = (props, {}) => {
             .style('pointer-events', 'none')
             .attr('startOffset', '50%')
             // .attr('filter', (d, i) => d && 'url(#edgefilter_' + i + ')')
-            .attr('style', 'cursor: pointer;font-size:18px;font-weight:bold')
+            .attr('style', 'cursor: pointer;font-size:18px;')
             .text(({ relType }) => relType || '');
 
         return edgepaths;

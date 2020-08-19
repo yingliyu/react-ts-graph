@@ -1,38 +1,9 @@
-export type INode = d3.SimulationNodeDatum & {
-    id: string;
-    name: string;
-    type: string;
-    level: number;
-};
-
-export type ILink = d3.SimulationLinkDatum<INode> & {
-    label?: string;
-    relType: string;
-};
-
-export interface LiteratureType {
-    name: string;
-    value: number;
-}
-
-export interface ICommonProps {
-    name: string;
-    value: number;
-}
-
-export interface IExampleData {
-    entityId: string;
-    entityName: string;
-    entityType: string;
-    orgId: string;
-    orgName: string;
-}
-
-export interface IGraphProps {
-    title?: string;
-    entities: INode[];
-    relations: ILink[];
-    expertId: string;
-    svgWidth: number;
-    svgHeight: number;
-}
+export const typeList1 = [
+    { key: 'expert', name: '专家' },
+    { key: 'keyword', name: '关键词' },
+    { key: 'org', name: '组织' },
+    { key: 'paper', name: '论文' },
+    { key: 'patent', name: '专利' },
+    // { key: 'project', name: '项目' },
+    { key: 'honor', name: '荣誉' }
+];

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import 'echarts-wordcloud';
 import echarts from 'echarts';
-import { ICommonProps } from '../../utils/constant';
+import 'echarts-wordcloud';
+import { ICommonProps } from '../../models/global';
 
 interface IWordCloud {
     list: ICommonProps[];
