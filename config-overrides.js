@@ -35,4 +35,5 @@ const config = override(
         '@': resolve(__dirname, 'src')
     })
 );
+
 module.exports = config;

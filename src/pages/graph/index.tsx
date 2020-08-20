@@ -11,11 +11,17 @@ import Graph from '../../components/graph';
 // import Pie from '../../components/charts/pie';
 // import Bar from '../../components/charts/bar';
 import debounce from 'lodash.debounce';
-import { baseApi, expertApi } from '../../services';
+import { baseApi, expertApi, subjectApi } from '../../services';
 
 import { IGraphComponentProps } from '../../models/graph';
 import { ICommonProps } from '../../models/global';
 import { LiteratureType, IExampleData } from '../../models/search';
+import { ALL_NODE_TYPES, COLOR_OBJ, RADIUS_LIST, FONTSIZE_LIST } from '../../utils/constant';
+const nodeAttribute = {
+    color: COLOR_OBJ,
+    radius: RADIUS_LIST,
+    fontSize: FONTSIZE_LIST
+};
 const { Option } = Select;
 let examplePage = 1;
 
@@ -84,12 +90,7 @@ const useQuery = () => {
     return new URLSearchParams(useLocation().search);
 };
 const GraphPage: React.FC<IGraphProps> = (props) => {
-    console.log(props);
-    const queryStr = useQuery();
-    const selectValue = queryStr.get('q');
-    const selectedId = queryStr.get('id');
-    console.log(selectValue);
-    console.log(selectedId);
+    // console.log(props);
 
     const exampleDefault: IExampleData[] = [];
     const [exampleList, setExampleList] = useState(exampleDefault);
@@ -116,13 +117,34 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
     });
     const [graphTypes, setGraphTypes] = useState<string[]>([]);
 
+    const queryStr = useQuery();
+    const selectValue = queryStr.get('q');
+    const selectedId = queryStr.get('id');
+    const selectedOrgId = queryStr.get('gid');
+
     useEffect(() => {
+        // window.addEventListener('click', function (event: any) {
+        //     console.log(event);
+        //     let e = event || window.event;
+        //     // if (e.cancelBubble) {
+        //     //     e.cancelBubble = true; //ie 阻止事件冒泡
+        //     // } else {
+        //     //     e.stopPropagation(); // 其余浏览器 阻止事件冒泡
+        //     // }
+        //     if (
+        //         event.target.id !== 'examples-words' &&
+        //         !event.target.className.indexOf('example-footer') &&
+        //         event.target.innerText !== '换一组'
+        //     ) {
+        //         setShowExample(false);
+        //     }
+        // });
         selectedId &&
             selectValue &&
             setQueryValue({
                 entityId: selectedId,
                 entityName: selectValue,
-                orgId: '_'
+                orgId: selectedOrgId || ''
             });
         refSelect && refSelect.current && refSelect.current.focus();
         inputSearchHandle(selectValue);
@@ -130,7 +152,7 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
 
     useEffect(() => {
         queryValue.entityId && getGraphData();
-    }, [queryValue]);
+    }, [queryValue, activeGraph]);
 
     // 获取示例数据
     const getExamplesData = async () => {
@@ -146,17 +168,35 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
 
     // 获取图谱数据-例如:人工智能
     const getGraphData = async () => {
-        props.history.push(`/graph?q=${queryValue.entityName}&id=${queryValue.entityId}`);
-        if (!queryValue.orgId) {
-            message.warn('当前版本仅支持搜索专家，换一个专家试试吧！');
-            return;
-        }
-        try {
-            const res = await expertApi.getExpertGraph(queryValue);
-            console.log(res);
+        let res: any;
 
+        props.history.push(
+            `/graph?q=${queryValue.entityName}&id=${queryValue.entityId}&type=${activeGraph}&gid=${queryValue.orgId}`
+        );
+        // if (!queryValue.orgId) {
+        //     message.warn('当前版本仅支持搜索专家，换一个专家试试吧！');
+        //     return;
+        // }
+        try {
+            if (queryValue.orgId) {
+                // 专家图谱
+                if (activeGraph === 0) {
+                    res = await expertApi.getExpertGraph(queryValue);
+                } else {
+                    // 资源图谱
+                }
+            } else {
+                // 学科词图谱
+                if (activeGraph === 0) {
+                    // 关系图谱
+                    res = await subjectApi.getSubjectGraph(queryValue);
+                } else {
+                    // 资源图谱
+                }
+            }
+
+            // const res = await expertApi.getExpertGraph(queryValue);
             setGraphData(res);
-            console.log(graphData);
 
             let types = new Set();
             res.entities.forEach((item: any) => {
@@ -171,8 +211,7 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
 
     // 关联监听输入框值change handle(获取关联下拉list)
     const inputSearchHandle = (value: any): void => {
-        console.log(value);
-
+        // console.log(value);
         setSuggestInfo({
             ...suggestInfo,
             loading: true
@@ -204,14 +243,14 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
     const selectSuggestWordHandle = (value: any) => {
         const params: any = JSON.parse(value);
         console.log(params);
-        if (!params.orgId) {
-            message.warn('当前版本仅支持搜索专家，换一个专家试试吧！');
-            return;
-        }
+        // if (!params.orgId) {
+        //     message.warn('当前版本仅支持搜索专家，换一个专家试试吧！');
+        //     return;
+        // }
         setQueryValue(params);
     };
 
-    // 显示示例
+    // 显示示例modal
     const showExampleHandle = () => {
         if (!showExample) {
             // examplePage = 1;
@@ -222,20 +261,21 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
     };
 
     // 示例点击
-    const exampleClickHandle = (item: IExampleData): void => {
+    const exampleClickHandle = (item: IExampleData, event: any): void => {
         console.log('click ok===', item);
+
         setActiveExampleId(item.entityId);
         const params = {
             entityId: item.entityId,
             entityName: item.entityName,
             orgId: item.orgId
         };
-        if (!params.orgId) {
-            message.warn('当前版本仅支持搜索专家，换一个专家试试吧！');
-            return;
-        }
-        setQueryValue(params);
         setShowExample(false);
+        // if (!params.orgId) {
+        //     message.warn('当前版本仅支持搜索专家，换一个专家试试吧！');
+        //     return;
+        // }
+        setQueryValue(params);
     };
 
     // 示例分页
@@ -246,13 +286,14 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
 
     // 切换图谱类型
     const toggleGraphHandle = () => {
-        if (activeGraph === 0) {
-            message.info('即将上线，敬请期待！');
-            return;
-        }
+        // if (activeGraph === 0) {
+        //     message.info('即将上线，敬请期待！');
+        //     return;
+        // }
         setActiveGraph(activeGraph === 0 ? 1 : 0);
     };
 
+    // 词云mock数据
     const wordCloudList: ICommonProps[] = [
         {
             name: '群个华',
@@ -347,8 +388,8 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
                     )}
                 >
                     <div className={css['statistics-wrapper']}>
-                        <span>实体{graphData && graphData.entityTotal}个</span>
-                        <span>关系{graphData && graphData.relationTotal}个</span>
+                        <span>实体{(graphData && graphData.entityTotal) || 'xxx'}个</span>
+                        <span>关系{(graphData && graphData.relationTotal) || 'xxx'}个</span>
                     </div>
                     {/* 专家基本信息 */}
                     <ExpertInfo />
@@ -368,10 +409,14 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
                             ref={refSelect}
                             showSearch
                             autoFocus={true}
-                            value={selectValue ? selectValue : queryValue.entityName}
+                            value={queryValue.entityName}
                             placeholder="请输入搜索词并在下拉菜单选择知识图谱"
                             notFoundContent={
-                                suggestInfo.loading ? <Spin size="small" /> : '无关联知识图谱'
+                                suggestInfo.loading ? (
+                                    <Spin size="small" />
+                                ) : (
+                                    '无关联知识图谱，请重新输入'
+                                )
                             }
                             filterOption={false}
                             onSearch={(value) => fetchSuggest(value)}
@@ -387,7 +432,7 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
                                         value={JSON.stringify({
                                             entityName: item.entityName,
                                             entityId: item.entityId,
-                                            orgId: item.orgId
+                                            orgId: item.orgId ? item.orgId : ''
                                         })}
                                     >
                                         {item.entityName + (item.orgName ? ' ' + item.orgName : '')}
@@ -405,7 +450,7 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
                                 `${showExample ? css['show-example'] : ''}`
                             ].join(' ')}
                         >
-                            <section className={css['expert-words']}>
+                            <section id="examples-words" className={css['expert-words']}>
                                 {exampleList.map((item, index) => {
                                     return (
                                         <Button
@@ -415,7 +460,7 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
                                                     : ''
                                             }
                                             key={item.entityName + '_' + index}
-                                            onClick={() => exampleClickHandle(item)}
+                                            onClick={(e) => exampleClickHandle(item, e)}
                                         >
                                             {item.entityName}
                                         </Button>
@@ -426,7 +471,9 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
                                 <Button type="primary" onClick={examplePageHandle}>
                                     换一组
                                 </Button>
-                                <Button onClick={() => setShowExample(false)}>关闭</Button>
+                                <Button id="close-btn" onClick={() => setShowExample(false)}>
+                                    关闭
+                                </Button>
                             </div>
                         </div>
                     </div>
@@ -440,11 +487,18 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
                     </div>
                     {/* 知识图谱 */}
                     {graphData && graphData.relations.length ? (
-                        <Graph {...graphData} {...props} svgWidth={1100} svgHeight={910} />
+                        <Graph
+                            svgWidth={1100}
+                            svgHeight={910}
+                            {...props}
+                            {...graphData}
+                            allNodeTypes={ALL_NODE_TYPES}
+                            nodeAttribute={nodeAttribute}
+                        />
                     ) : (
                         <p className={css['no-graph-desc']}>
                             未搜索到与<i>{queryValue.entityName}</i>
-                            相关的知识谱图，换一个词试试吧！
+                            相关的{activeGraph ? '资源' : '关系'}图谱，换一个词试试吧！
                         </p>
                     )}
                 </div>

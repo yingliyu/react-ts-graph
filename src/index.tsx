@@ -1,10 +1,11 @@
-// import 'core-js';
-// import 'core-js/es/map';
+import 'core-js';
+import 'core-js/modules/es.map';
 // import 'core-js/es/set';
+// /Users/lemonyu/Desktop/work/project/sstir-graph/node_modules/core-js/modules/es.map.js
 import 'regenerator-runtime/runtime';
 import 'react-app-polyfill/ie9';
 import 'react-app-polyfill/stable';
-import 'raf/polyfill';
+// import 'raf/polyfill';
 
 import React from 'react';
 import ReactDOM from 'react-dom';

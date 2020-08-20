@@ -10,24 +10,18 @@ module.exports = {
                 }
             }
         ],
-        [
-            '@babel/preset-env',
-            {
-                useBuiltIns: 'entry',
-                corejs: 3,
-                proposals: true
-            }
-        ]
+        ['@babel/preset-env']
     ],
     plugins: [
         'add-module-exports',
         '@babel/plugin-transform-typescript',
         [
-            '@babel/plugin-transform-runtime'
-            // {
-            //     corejs: 3,
-            //     proposals: true
-            // }
+            '@babel/plugin-transform-runtime',
+            {
+                useBuiltIns: 'entry',
+                corejs: 3,
+                proposals: true
+            }
         ]
     ]
 };

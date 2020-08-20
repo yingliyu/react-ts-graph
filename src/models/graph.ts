@@ -11,12 +11,22 @@ export type ILink = d3.SimulationLinkDatum<INode> & {
 };
 
 export interface IGraphComponentProps {
-    title?: string;
     entities: INode[];
     relations: ILink[];
     expertId: string;
-    svgWidth?: number;
-    svgHeight?: number;
+    subjectId: string;
     entityTotal: number;
     relationTotal: number;
+    allNodeTypes: {
+        [propName: string]: string;
+    };
+
+    nodeAttribute: {
+        color: string[];
+        radius: number[];
+        fontSize: number[];
+    };
+    title?: string;
+    svgWidth?: number;
+    svgHeight?: number;
 }

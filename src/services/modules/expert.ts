@@ -1,9 +1,9 @@
 import { AppPost } from '../../utils/request';
-
+// 专家关系图谱
 interface expertGraphParams {
-  entityId: string;
-  entityName: string;
+    entityId: string;
+    entityName: string;
 }
 export function getExpertGraph(params: expertGraphParams) {
-  return AppPost('/aikg/data-service/expert/relation-graph/v1', params);
+    return AppPost('/aikg/data-service/expert/relation-graph/v1', params);
 }
