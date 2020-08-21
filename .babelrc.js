@@ -1,16 +1,12 @@
 module.exports = {
     presets: [
+        '@babel/preset-react',
         [
-            '@babel/preset-react',
-            '@babel/env',
-            '@babel/react',
+            '@babel/preset-env',
             {
-                targets: {
-                    ie: '10'
-                }
+                useBuiltIns: 'entry'
             }
-        ],
-        ['@babel/preset-env']
+        ]
     ],
     plugins: [
         'add-module-exports',
@@ -18,9 +14,8 @@ module.exports = {
         [
             '@babel/plugin-transform-runtime',
             {
-                useBuiltIns: 'entry',
                 corejs: 3,
-                proposals: true
+                version: '^7.7.4'
             }
         ]
     ]
