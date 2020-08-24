@@ -9,10 +9,8 @@ const ExpertInfo = () => {
                     <img src={expertImg} alt="专家头像" />
                 </div>
                 <span>钟南山</span>
-                <span>zhongnanshanzhongnanshanzhongnanshanzhongnanshanzhongnanshan</span>
-                <span>
-                    机构名称XXXXXXXXXX机构名称XXXXXXXXXX机构名称XXXXXXXXXX机构名称XXXXXXXXXX机构名称XXXXXXXXXX机构名称XXXXXXXXXX
-                </span>
+                <span>zhongnanshan</span>
+                <span>机构名称XXXXXXXXXX</span>
             </div>
             <ul>
                 <li>

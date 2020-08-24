@@ -11,6 +11,7 @@
     }
     .container {
         width: 100%;
+        // min-height: calc(100vh - 60px);
         height: calc(100vh - 60px);
         background: #f3f6f9;
         padding: 25px 18px 18px;
@@ -68,7 +69,7 @@
                     text-align: left;
                     box-sizing: border-box;
                     display: none;
-                    z-index: 2;
+                    z-index: 3;
                     background-color: #fff;
                     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
                     &:before {
@@ -114,6 +115,7 @@
                 text-align: left;
                 padding-left: 20px;
                 padding-top: 20px;
+                z-index: 2;
                 :global .ant-radio-button-wrapper-checked {
                     background: #1890ff;
                     color: #fff;
@@ -141,29 +143,59 @@
             section {
                 width: 100%;
                 background-color: #fff;
-                margin-bottom: 12px;
+                margin-top: 10px;
             }
         }
-        .aside-left-wrapper {
-            .subject-distribution {
-                height: 265px;
-            }
-            .hotwords-distribution {
-                height: 280px;
-            }
+    }
+    @media screen and (max-width: 1280px) {
+        h2 {
+            height: 57px;
+            line-height: 57px;
         }
-        .aside-right-wrapper {
-            .literature-field {
-                height: 180px;
+        .container {
+            width: 100%;
+            height: calc(100vh - 57px);
+            padding: 12px;
+            background-color: lightblue;
+            .main-wrapper {
+                min-width: 720px;
+                .search-wrapper {
+                    position: relative;
+                    :global .ant-select-selection--single,
+                    :global .ant-select-selection__rendered {
+                        width: 380px;
+                        height: 35px;
+                        line-height: 35px;
+                        box-sizing: border-box;
+                    }
+                    .examples-wrapper {
+                        right: 124px;
+                        top: 48px;
+                        :global .ant-btn {
+                            font-size: 12px;
+                        }
+                    }
+                }
             }
-            .journal-distribution {
-                height: 180px;
-            }
-            .key-disciplines {
-                height: 180px;
-            }
-            .high-cited {
-                height: 142px;
+
+            .aside-wrapper {
+                flex: 0 0 270px;
+                width: 270px;
+                height: 100%;
+                .statistics-wrapper {
+                    span {
+                        display: inline-block;
+                        background: #fff;
+                        border-radius: 5px;
+                        width: 130px;
+                        height: 35px;
+                        line-height: 35px;
+                        font-size: 12px;
+                        &:first-child {
+                            margin-right: 10px;
+                        }
+                    }
+                }
             }
         }
     }

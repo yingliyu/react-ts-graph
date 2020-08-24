@@ -3,9 +3,10 @@ import css from './index.module.less';
 import * as d3 from 'd3';
 import { INode, ILink, IGraphComponentProps } from '../../models/graph';
 import { message } from 'antd';
-
+import useSize from '../../hooks/size';
 const Graph: React.FC<IGraphComponentProps> = (props, {}) => {
     // console.log(props);
+    const { done, kgGraphCenterNodeR, kgGraphSmallNodeR } = useSize();
 
     const {
         entities: nodesData,
@@ -30,12 +31,12 @@ const Graph: React.FC<IGraphComponentProps> = (props, {}) => {
 
     useEffect((): void => {
         d3.selectAll('section svg').remove();
-        if (linksData && linksData.length) {
+        if (linksData && linksData.length && done) {
             initSvg();
             initForceSimulation();
             getNodeTypes();
         }
-    }, [linksData]);
+    }, [linksData, done]);
 
     // init SVG
     const initSvg = () => {
@@ -157,7 +158,9 @@ const Graph: React.FC<IGraphComponentProps> = (props, {}) => {
         nodes
             .append('circle')
             .attr('class', 'circle-element')
-            .attr('r', (d: INode) => (d.id === centerNodeId ? 80 : 40))
+            .attr('r', (d: INode) =>
+                d.id === centerNodeId ? kgGraphCenterNodeR : kgGraphSmallNodeR
+            )
             .attr('fill', (d: any) => nodeAttribute.color[d.type])
             .attr('style', 'cursor: pointer;');
 
@@ -339,14 +342,15 @@ const Graph: React.FC<IGraphComponentProps> = (props, {}) => {
         const linkForce = d3
             .forceLink<INode, ILink>(linksData)
             .id((data: INode) => data.id)
-            .distance(220);
+            .distance(kgGraphCenterNodeR * 2);
+        // .distance(220);
         const nodeCollision = d3
             .forceCollide()
             .radius((d) => {
                 if ((d as INode).id === centerNodeId) {
-                    return 70;
+                    return kgGraphCenterNodeR;
                 } else {
-                    return 52;
+                    return kgGraphSmallNodeR + 10;
                 }
             })
             .iterations(0.5)

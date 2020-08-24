@@ -6,6 +6,7 @@ import Title from './components/title';
 import ExpertInfo from './components/expert-info';
 // import WordCloud from '../../components/word-cloud';
 import ExpertResume from './components/expert-resume';
+import ContainerItem from './components/container-item';
 import Graph from '../../components/graph';
 // import EchartsGraph from '../../components/charts/graph/index';
 // import Pie from '../../components/charts/pie';
@@ -16,6 +17,7 @@ import { baseApi, expertApi, subjectApi } from '../../services';
 import { IGraphComponentProps } from '../../models/graph';
 import { ICommonProps } from '../../models/global';
 import { LiteratureType, IExampleData } from '../../models/search';
+import useSize from '../../hooks/size';
 import { ALL_NODE_TYPES, COLOR_OBJ, RADIUS_LIST, FONTSIZE_LIST } from '../../utils/constant';
 const nodeAttribute = {
     color: COLOR_OBJ,
@@ -89,9 +91,20 @@ interface IGraphProps {
 const useQuery = () => {
     return new URLSearchParams(useLocation().search);
 };
+
 const GraphPage: React.FC<IGraphProps> = (props) => {
     // console.log(props);
-
+    const {
+        inputWidth,
+        inputHeight,
+        kgWidth,
+        kgHeight,
+        commonW,
+        commonH,
+        subjectDistH,
+        hotWordsH,
+        highCitedH
+    } = useSize();
     const exampleDefault: IExampleData[] = [];
     const [exampleList, setExampleList] = useState(exampleDefault);
     const [activeExampleId, setActiveExampleId] = useState('0');
@@ -105,6 +118,7 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
     const refSelect = useRef<any>();
     const [graphData, setGraphData] = useState<IGraphComponentProps>();
     const [activeGraph, setActiveGraph] = useState(0);
+    const [screenWidth, setScreenWidth] = useState(1920);
     /*{
         entityId: 'f7c1fd353bb04c949ef1747e96ca76ed',
         entityName: '李飞飞',
@@ -139,6 +153,8 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
         //         setShowExample(false);
         //     }
         // });
+
+        setScreenWidth(window.screen.width);
         selectedId &&
             selectValue &&
             setQueryValue({
@@ -290,6 +306,8 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
         //     message.info('即将上线，敬请期待！');
         //     return;
         // }
+        console.log(activeGraph);
+
         setActiveGraph(activeGraph === 0 ? 1 : 0);
     };
 
@@ -388,19 +406,33 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
                     )}
                 >
                     <div className={css['statistics-wrapper']}>
-                        <span>实体{(graphData && graphData.entityTotal) || 'xxx'}个</span>
-                        <span>关系{(graphData && graphData.relationTotal) || 'xxx'}个</span>
+                        <span>实体{(graphData && graphData.entityTotal) || 0}个</span>
+                        <span>关系{(graphData && graphData.relationTotal) || 0}个</span>
                     </div>
                     {/* 专家基本信息 */}
                     <ExpertInfo />
-                    <section className={css['subject-distribution']}>
-                        <Title title="学科分布" />
+
+                    <ContainerItem
+                        width={commonW}
+                        height={subjectDistH}
+                        title="学科分布"
+                        backgroundColor="#fff"
+                        borderRadius={5}
+                        marginTop={10}
+                    >
                         {/* <WordCloud list={wordCloudList} /> */}
-                    </section>
-                    <section className={css['hotwords-distribution']}>
-                        <Title title="热词分布" />
+                    </ContainerItem>
+
+                    <ContainerItem
+                        width={commonW}
+                        height={hotWordsH}
+                        title="热词分布"
+                        backgroundColor="#fff"
+                        borderRadius={5}
+                        marginTop={10}
+                    >
                         {/* <EchartsGraph /> */}
-                    </section>
+                    </ContainerItem>
                 </div>
                 <div className={css['main-wrapper']}>
                     {/* 搜索模块 start */}
@@ -421,7 +453,8 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
                             filterOption={false}
                             onSearch={(value) => fetchSuggest(value)}
                             onChange={(value: any) => selectSuggestWordHandle(value)}
-                            style={{ width: 480, height: 48 }}
+                            // style={{ width: 480, height: 48 }}
+                            style={{ width: inputWidth, height: inputHeight }}
                             showArrow={false}
                             defaultActiveFirstOption={true}
                         >
@@ -488,8 +521,8 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
                     {/* 知识图谱 */}
                     {graphData && graphData.relations.length ? (
                         <Graph
-                            svgWidth={1100}
-                            svgHeight={910}
+                            svgWidth={kgWidth}
+                            svgHeight={kgHeight}
                             {...props}
                             {...graphData}
                             allNodeTypes={ALL_NODE_TYPES}
@@ -509,39 +542,61 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
                 >
                     <div className={css['statistics-wrapper']}>
                         <span>文献134xx篇</span>
-                        <span>科研项目134xxx个</span>
+                        <span>科研项目134xx个</span>
                     </div>
                     {/* 专家履历 */}
                     <ExpertResume />
-
-                    <section className={css['literature-field']}>
-                        <Title title="文献领域分布" />
+                    <ContainerItem
+                        width={commonW}
+                        height={commonH}
+                        title="文献领域分布"
+                        backgroundColor="#fff"
+                        borderRadius={5}
+                        marginTop={10}
+                    >
                         {/* <Pie
                             data={literatureFieldList}
                             canvasContainer="pieContainer"
                             type="ring"
                         /> */}
-                    </section>
+                    </ContainerItem>
 
-                    <section className={css['journal-distribution']}>
-                        <Title title="期刊分布" />
+                    <ContainerItem
+                        width={commonW}
+                        height={commonH}
+                        title="发文期刊分布"
+                        backgroundColor="#fff"
+                        borderRadius={5}
+                        marginTop={10}
+                    >
                         {/* <Bar
-                            width={370}
+                            width={commonW}
                             height={145}
                             data={journalDistributionList}
                             canvasContainer="barContainer"
                         /> */}
-                    </section>
-
-                    <section className={css['key-disciplines']}>
-                        <Title title="重点学科匹配度" />
+                    </ContainerItem>
+                    <ContainerItem
+                        width={commonW}
+                        height={commonH}
+                        title="重点学科匹配度"
+                        backgroundColor="#fff"
+                        borderRadius={5}
+                        marginTop={10}
+                    >
                         {/* <Pie data={literatureFieldList} canvasContainer="simplePieContainer" /> */}
-                    </section>
+                    </ContainerItem>
 
-                    <section className={css['high-cited']}>
-                        <Title title="高被引占比" />
+                    <ContainerItem
+                        width={commonW}
+                        height={highCitedH}
+                        title="高被引占比"
+                        backgroundColor="#fff"
+                        borderRadius={5}
+                        marginTop={10}
+                    >
                         {/* <Bar
-                            width={370}
+                            width={commonW}
                             height={100}
                             data={hightCitedList}
                             canvasContainer="verticalBarContainer"
@@ -550,7 +605,7 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
                             barBorderRadius={30}
                             align="vertical"
                         /> */}
-                    </section>
+                    </ContainerItem>
                 </div>
             </div>
         </div>
