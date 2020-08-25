@@ -6,7 +6,7 @@ export default function useSize() {
         inputWidth: 480,
         inputHeight: 48,
         kgWidth: 1100,
-        kgHeight: 900,
+        kgHeight: 930,
         kgGraphCenterNodeR: 85,
         kgGraphSmallNodeR: 40,
         kgNodeR: [150, 80, 60, 50, 40, 30],
@@ -15,7 +15,6 @@ export default function useSize() {
         commonH: 180,
         subjectDistH: 265,
         hotWordsH: 280,
-        liteFieldDistH: 180,
         highCitedH: 142
     });
 
@@ -39,26 +38,24 @@ export default function useSize() {
                     commonH: 130,
                     subjectDistH: 190,
                     hotWordsH: 205,
-                    liteFieldDistH: 130,
                     highCitedH: 102
                 });
             } else if (screenWidth <= 1440) {
                 setSize({
                     done: true,
-                    inputWidth: 380,
-                    inputHeight: 35,
-                    kgWidth: 1100,
-                    kgHeight: 900,
-                    kgGraphCenterNodeR: 85,
-                    kgGraphSmallNodeR: 45,
+                    inputWidth: 420,
+                    inputHeight: 41,
+                    kgWidth: 805,
+                    kgHeight: 780,
+                    kgGraphCenterNodeR: 67,
+                    kgGraphSmallNodeR: 40,
                     kgNodeR: [150, 80, 60, 50, 40, 30],
                     kgNodeFontSize: [22, 18, 16, 14, 13, 12],
-                    commonW: 270,
-                    commonH: 130,
-                    subjectDistH: 190,
-                    hotWordsH: 205,
-                    liteFieldDistH: 130,
-                    highCitedH: 102
+                    commonW: 300,
+                    commonH: 147,
+                    subjectDistH: 215,
+                    hotWordsH: 231,
+                    highCitedH: 117
                 });
             } else {
                 setSize({ ...size, done: true });

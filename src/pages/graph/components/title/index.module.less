@@ -6,7 +6,7 @@
     padding-left: 25px;
     position: relative;
     border-bottom: 1px solid #f3f6f9;
-    // background-color: #fff;
+    color: #000;
     &:before {
         content: '';
         display: block;
@@ -16,5 +16,17 @@
         top: 8px;
         left: 12px;
         background-color: #2079ff;
+    }
+}
+@media screen and (max-width: 1280px) {
+    .title {
+        font-size: 12px;
+        padding-left: 20px;
+        &:before {
+            width: 3px;
+            height: 10px;
+            top: 11px;
+            left: 12px;
+        }
     }
 }

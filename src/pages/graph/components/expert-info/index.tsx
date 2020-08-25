@@ -8,7 +8,7 @@ const ExpertInfo = () => {
                 <div className={css['expert-head-wrapper']}>
                     <img src={expertImg} alt="专家头像" />
                 </div>
-                <span>钟南山</span>
+                <h5>钟南山</h5>
                 <span>zhongnanshan</span>
                 <span>机构名称XXXXXXXXXX</span>
             </div>

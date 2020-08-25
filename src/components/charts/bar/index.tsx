@@ -239,7 +239,7 @@ const Bar: React.FC<PropsType> = (props) => {
                                 temp = temp.padEnd(7, ' ');
                                 return temp;
                             } else {
-                                return value;
+                                return (value * 100).toFixed(2) + '%';
                             }
                         },
                         textStyle: {

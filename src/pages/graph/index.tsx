@@ -4,13 +4,13 @@ import css from './index.module.less';
 import { Select, Radio, Button, Spin, Icon, message } from 'antd';
 import Title from './components/title';
 import ExpertInfo from './components/expert-info';
-// import WordCloud from '../../components/word-cloud';
+import WordCloud from '../../components/word-cloud';
 import ExpertResume from './components/expert-resume';
 import ContainerItem from './components/container-item';
 import Graph from '../../components/graph';
-// import EchartsGraph from '../../components/charts/graph/index';
-// import Pie from '../../components/charts/pie';
-// import Bar from '../../components/charts/bar';
+import EchartsGraph from '../../components/charts/graph/index';
+import Pie from '../../components/charts/pie';
+import Bar from '../../components/charts/bar';
 import debounce from 'lodash.debounce';
 import { baseApi, expertApi, subjectApi } from '../../services';
 
@@ -72,11 +72,11 @@ const journalDistributionList: LiteratureType[] = [
 const hightCitedList: LiteratureType[] = [
     {
         name: '使用中资源量已损坏资源量',
-        value: 50000000
+        value: 0.57
     },
     {
         name: '已损坏资源量',
-        value: 120000000
+        value: 0.43
     }
 ];
 

@@ -54,7 +54,7 @@ const Pie: React.FC<PropsType> = (props) => {
         const optionData = getData(data);
 
         const pieSeries = {
-            name: '',
+            name: '文献领域分布',
             type: 'pie',
             radius: [0, 55],
             center: ['20%', '35%'],
@@ -64,8 +64,9 @@ const Pie: React.FC<PropsType> = (props) => {
         const option: any = {
             color: ['#fdc765', '#23cbff', '#00e5c1', '#E1A4C4', '#857ABA'],
             tooltip: {
-                show: true,
-                formatter: '{a} <br/>{b} : {c} ({d}%)'
+                trigger: 'item',
+                // formatter: '{a} <br/>{b} : {c} ({d}%)'
+                formatter: '{b} : {c} ({d}%)'
             },
             legend: {
                 show: true,
@@ -137,7 +138,7 @@ const Pie: React.FC<PropsType> = (props) => {
         };
         for (let i = 0; i < data.length; i++) {
             const seriesData = {
-                name: '',
+                name: '文献领域分布',
                 type: 'pie',
                 clockWise: false,
                 radius: [(i + 1) * 10, (i + 2) * 10],
