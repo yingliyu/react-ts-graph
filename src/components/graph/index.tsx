@@ -150,8 +150,8 @@ const Graph: React.FC<IGraphComponentProps> = (props, {}) => {
                     .on('end', ended)
                     .on('drag', dragged)
                     .on('end', ended)
-            )
-            .on('click', (d) => clickNodeHandle(d));
+            );
+        // .on('click', (d) => clickNodeHandle(d));
 
         nodes.append('title').text((data) => data.name);
 
