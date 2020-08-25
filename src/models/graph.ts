@@ -20,7 +20,7 @@ export interface IGraphComponentProps {
     allNodeTypes: {
         [propName: string]: string;
     };
-
+    graphType: number;
     nodeAttribute: {
         color: string[];
         radius: number[];

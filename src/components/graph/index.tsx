@@ -4,17 +4,17 @@ import * as d3 from 'd3';
 import { INode, ILink, IGraphComponentProps } from '../../models/graph';
 import { message } from 'antd';
 import useSize from '../../hooks/size';
-const Graph: React.FC<IGraphComponentProps> = (props, {}) => {
-    // console.log(props);
-    const { done, kgGraphCenterNodeR, kgGraphSmallNodeR } = useSize();
 
+const Graph: React.FC<IGraphComponentProps> = (props, {}) => {
+    const { done, kgAssNodeR, kgAssNodeFontSize, kgNodeR } = useSize();
     const {
         entities: nodesData,
         relations: linksData,
         svgWidth = 1100,
         svgHeight = 900,
         nodeAttribute,
-        allNodeTypes
+        allNodeTypes,
+        graphType
     } = props;
 
     const centerNodeId = props.expertId ? props.expertId : props.subjectId;
@@ -150,17 +150,15 @@ const Graph: React.FC<IGraphComponentProps> = (props, {}) => {
                     .on('end', ended)
                     .on('drag', dragged)
                     .on('end', ended)
-            );
-        // .on('click', (d) => clickNodeHandle(d));
+            )
+            .on('click', (d) => clickNodeHandle(d));
 
         nodes.append('title').text((data) => data.name);
 
         nodes
             .append('circle')
             .attr('class', 'circle-element')
-            .attr('r', (d: INode) =>
-                d.id === centerNodeId ? kgGraphCenterNodeR : kgGraphSmallNodeR
-            )
+            .attr('r', (d: INode) => (graphType ? kgNodeR[d.level] : kgAssNodeR[d.level]))
             .attr('fill', (d: any) => nodeAttribute.color[d.type])
             .attr('style', 'cursor: pointer;');
 
@@ -173,7 +171,7 @@ const Graph: React.FC<IGraphComponentProps> = (props, {}) => {
                 'style',
                 (d) =>
                     `cursor: pointer;text-anchor: middle;dominant-baseline: middle;font-size:${
-                        d.id === centerNodeId ? '24px' : '14px'
+                        kgAssNodeFontSize[d.level]
                     }`
             )
             .append('tspan')
@@ -342,17 +340,11 @@ const Graph: React.FC<IGraphComponentProps> = (props, {}) => {
         const linkForce = d3
             .forceLink<INode, ILink>(linksData)
             .id((data: INode) => data.id)
-            .distance(kgGraphCenterNodeR * 2);
+            .distance(kgAssNodeR[0] * 2);
         // .distance(220);
         const nodeCollision = d3
             .forceCollide()
-            .radius((d) => {
-                if ((d as INode).id === centerNodeId) {
-                    return kgGraphCenterNodeR;
-                } else {
-                    return kgGraphSmallNodeR + 10;
-                }
-            })
+            .radius((d: any) => kgAssNodeR[d.level] * 1 + 10)
             .iterations(0.5)
             .strength(0.5);
 

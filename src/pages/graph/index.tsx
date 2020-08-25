@@ -189,10 +189,10 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
         props.history.push(
             `/graph?q=${queryValue.entityName}&id=${queryValue.entityId}&type=${activeGraph}&gid=${queryValue.orgId}`
         );
-        if (!queryValue.orgId) {
-            message.warn('当前版本仅支持搜索专家，换一个专家试试吧！');
-            return;
-        }
+        // if (!queryValue.orgId) {
+        //     message.warn('当前版本仅支持搜索专家，换一个专家试试吧！');
+        //     return;
+        // }
         try {
             if (queryValue.orgId) {
                 // 专家图谱
@@ -259,10 +259,10 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
     const selectSuggestWordHandle = (value: any) => {
         const params: any = JSON.parse(value);
         console.log(params);
-        if (!params.orgId) {
-            message.warn('当前版本仅支持搜索专家，换一个专家试试吧！');
-            return;
-        }
+        // if (!params.orgId) {
+        //     message.warn('当前版本仅支持搜索专家，换一个专家试试吧！');
+        //     return;
+        // }
         setQueryValue(params);
     };
 
@@ -285,10 +285,10 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
             orgId: item.orgId
         };
         setShowExample(false);
-        if (!params.orgId) {
-            message.warn('当前版本仅支持搜索专家，换一个专家试试吧！');
-            return;
-        }
+        // if (!params.orgId) {
+        //     message.warn('当前版本仅支持搜索专家，换一个专家试试吧！');
+        //     return;
+        // }
         setQueryValue(params);
     };
 
@@ -300,10 +300,10 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
 
     // 切换图谱类型
     const toggleGraphHandle = () => {
-        if (activeGraph === 0) {
-            message.info('当前版本仅支持搜索关系图谱');
-            return;
-        }
+        // if (activeGraph === 0) {
+        //     message.info('当前版本仅支持搜索关系图谱');
+        //     return;
+        // }
         // console.log(activeGraph);
 
         setActiveGraph(activeGraph === 0 ? 1 : 0);
@@ -525,6 +525,7 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
                             {...graphData}
                             allNodeTypes={ALL_NODE_TYPES}
                             nodeAttribute={nodeAttribute}
+                            graphType={activeGraph}
                         />
                     ) : (
                         <p className={css['no-graph-desc']}>
