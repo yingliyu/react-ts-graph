@@ -18,6 +18,7 @@ import { IGraphComponentProps } from '../../models/graph';
 import { ICommonProps } from '../../models/global';
 import { LiteratureType, IExampleData } from '../../models/search';
 import useSize from '../../hooks/size';
+// import useHide from '../../hooks/hide';
 import { ALL_NODE_TYPES, COLOR_OBJ, RADIUS_LIST, FONTSIZE_LIST } from '../../utils/constant';
 const nodeAttribute = {
     color: COLOR_OBJ,
@@ -105,6 +106,8 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
         hotWordsH,
         highCitedH
     } = useSize();
+    // const exampleWrapper = document.getElementById('examples-words');
+    // useHide(exampleWrapper as HTMLElement);
     const exampleDefault: IExampleData[] = [];
     const [exampleList, setExampleList] = useState(exampleDefault);
     const [activeExampleId, setActiveExampleId] = useState('0');
@@ -137,23 +140,12 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
     const selectedOrgId = queryStr.get('gid');
 
     useEffect(() => {
-        // window.addEventListener('click', function (event: any) {
-        //     console.log(event);
-        //     let e = event || window.event;
-        //     // if (e.cancelBubble) {
-        //     //     e.cancelBubble = true; //ie 阻止事件冒泡
-        //     // } else {
-        //     //     e.stopPropagation(); // 其余浏览器 阻止事件冒泡
-        //     // }
-        //     if (
-        //         event.target.id !== 'examples-words' &&
-        //         !event.target.className.indexOf('example-footer') &&
-        //         event.target.innerText !== '换一组'
-        //     ) {
-        //         setShowExample(false);
-        //     }
-        // });
-
+        const exampleWrapper = document.getElementById('examples-words');
+        window.addEventListener('click', function (event: any) {
+            if (!(exampleWrapper as HTMLElement).contains(event.target)) {
+                setShowExample(false);
+            }
+        });
         setScreenWidth(window.screen.width);
         selectedId &&
             selectValue &&
@@ -476,12 +468,13 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
                         </span>
                         {/* 展示所有示例 */}
                         <div
+                            id="examples-words"
                             className={[
                                 `${css['examples-wrapper']}`,
                                 `${showExample ? css['show-example'] : ''}`
                             ].join(' ')}
                         >
-                            <section id="examples-words" className={css['expert-words']}>
+                            <section className={css['expert-words']}>
                                 {exampleList.map((item, index) => {
                                     return (
                                         <Button
