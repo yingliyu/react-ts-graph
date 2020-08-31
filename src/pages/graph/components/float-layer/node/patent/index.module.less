@@ -1,0 +1,37 @@
+.patent-layer {
+    width: 320px;
+    font-size: 12px;
+    text-align: left;
+    padding-top: 5px;
+    li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        line-height: 20px;
+        span {
+            &:last-child {
+                display: inline-block;
+                max-width: 260px;
+                max-height: 120px;
+                overflow-y: scroll;
+            }
+        }
+        :global .ant-tag.ant-tag-geekblue {
+            margin-bottom: 5px;
+            background: none;
+        }
+        span.subject-tags {
+            display: flex;
+            align-items: center;
+        }
+        &:last-child {
+            align-items: flex-start;
+        }
+        .limit-one-line {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+        }
+    }
+}

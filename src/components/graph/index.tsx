@@ -150,8 +150,8 @@ const Graph: React.FC<IGraphComponentProps> = (props, {}) => {
                     .on('end', ended)
                     .on('drag', dragged)
                     .on('end', ended)
-            );
-        // .on('click', (d) => clickNodeHandle(d));
+            )
+            .on('click', (d) => clickNodeHandle(d));
 
         nodes.append('title').text((data) => data.name);
 
@@ -271,7 +271,7 @@ const Graph: React.FC<IGraphComponentProps> = (props, {}) => {
             .style('pointer-events', 'none')
             .attr('startOffset', '50%')
             // .attr('filter', (d, i) => d && 'url(#edgefilter_' + i + ')')
-            .attr('style', 'cursor: pointer;font-size:18px;')
+            .attr('style', `cursor: pointer;font-size:${kgAssNodeFontSize[1] + 2}px;`)
             .text(({ relType }) => relType || '');
 
         return edgepaths;

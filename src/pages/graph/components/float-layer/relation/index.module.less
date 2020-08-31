@@ -1,0 +1,48 @@
+.relation-layer {
+    width: 380px;
+    height: 350px;
+    // position: absolute;
+    // right: 0;
+    // bottom: 0px;
+    padding: 0 0 15px;
+    border-radius: 6px;
+    background-color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    color: #000;
+
+    .layer-tags {
+        height: 42px;
+        line-height: 42px;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 15px;
+        small {
+            cursor: pointer;
+            color: #bdbdbd;
+            &:hover {
+                color: #2f83e4;
+            }
+        }
+    }
+    .layer-header {
+        height: 32px;
+        line-height: 32px;
+        padding: 0 15px;
+        display: flex;
+        justify-content: space-between;
+        background: #eff4fb;
+        font-size: 14px;
+        small {
+            font-size: 12px;
+        }
+    }
+    :global .ant-tabs-bar {
+        margin-bottom: 0px;
+    }
+    :global .ant-tabs-nav-container {
+        font-size: 12px;
+    }
+    .layer-body {
+        padding: 0 15px 10px;
+    }
+}

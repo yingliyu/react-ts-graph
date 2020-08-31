@@ -7,7 +7,7 @@ const getBaseUrl = (env) => {
         // development
         case 'dev':
             return {
-                baseUrl: 'http://api.aikg.test.sstir.cn'
+                baseUrl: 'http://dev.api.aikg.test.sstir.cn'
             };
         // production
         case 'prod':

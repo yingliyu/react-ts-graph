@@ -1,4 +1,5 @@
 import React from 'react';
+// import { Avatar } from 'antd';
 import css from './index.module.less';
 const expertImg = require('./imgs/zhong.jpg');
 const ExpertInfo = () => {
@@ -7,6 +8,7 @@ const ExpertInfo = () => {
             <div className={css['expert-head']}>
                 <div className={css['expert-head-wrapper']}>
                     <img src={expertImg} alt="专家头像" />
+                    {/* <Avatar src={expertImg} size={92} icon="专家头像" /> */}
                 </div>
                 <h5>钟南山</h5>
                 <span>zhongnanshan</span>

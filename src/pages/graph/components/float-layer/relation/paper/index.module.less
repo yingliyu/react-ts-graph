@@ -1,0 +1,49 @@
+.paper-layer {
+    height: 233px;
+    overflow-y: scroll;
+    text-align: left;
+    .paper-head {
+        display: flex;
+        justify-content: space-between;
+        .paper-titile {
+            width: 270px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        small {
+            font-size: 12px;
+            color: #7f7f7f;
+        }
+    }
+    :global .ant-list-item {
+        padding: 10px 0;
+    }
+    :global .ant-list-vertical .ant-list-item-meta {
+        margin-bottom: 0px;
+    }
+    :global .ant-list-vertical .ant-list-item-meta-title {
+        line-height: 16px;
+        margin-bottom: 5px;
+    }
+    :global .ant-list-item-meta-description {
+        width: 350px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        cursor: pointer;
+        font-size: 12px;
+        color: #000;
+    }
+    .paper-abstract {
+        width: 350px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        cursor: pointer;
+        font-size: 12px;
+        color: #000;
+    }
+}

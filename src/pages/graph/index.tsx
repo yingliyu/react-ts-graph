@@ -1,16 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import css from './index.module.less';
-import { Select, Radio, Button, Spin, Icon, message } from 'antd';
+import { Select, Radio, Button, Spin, Icon, message, Drawer } from 'antd';
 import Title from './components/title';
 import ExpertInfo from './components/expert-info';
 import WordCloud from '../../components/word-cloud';
 import ExpertResume from './components/expert-resume';
 import ContainerItem from './components/container-item';
 import Graph from '../../components/graph';
+import Search from './components/search';
 import EchartsGraph from '../../components/charts/graph/index';
 import Pie from '../../components/charts/pie';
 import Bar from '../../components/charts/bar';
+import NodeLayer from './components/float-layer/node';
+import RelationLayer from './components/float-layer/relation';
 import debounce from 'lodash.debounce';
 import { baseApi, expertApi, subjectApi } from '../../services';
 
@@ -25,7 +28,7 @@ const nodeAttribute = {
     radius: RADIUS_LIST,
     fontSize: FONTSIZE_LIST
 };
-const { Option } = Select;
+
 let examplePage = 1;
 
 const literatureFieldList: LiteratureType[] = [
@@ -113,6 +116,7 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
     const [activeExampleId, setActiveExampleId] = useState('0');
     const [showExample, setShowExample] = useState(false);
     const [search, setSearch] = useState([]);
+    const [currentDrawer, setCurrentDrawer] = useState<string>('');
 
     const [suggestInfo, setSuggestInfo] = useState({
         list: [],
@@ -121,7 +125,6 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
     const refSelect = useRef<any>();
     const [graphData, setGraphData] = useState<IGraphComponentProps>();
     const [activeGraph, setActiveGraph] = useState(0);
-    const [screenWidth, setScreenWidth] = useState(1920);
     /*{
         entityId: 'f7c1fd353bb04c949ef1747e96ca76ed',
         entityName: '李飞飞',
@@ -130,14 +133,14 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
     const [queryValue, setQueryValue] = useState({
         entityId: '',
         entityName: '',
-        orgId: ''
+        entityType: ''
     });
     const [graphTypes, setGraphTypes] = useState<string[]>([]);
 
     const queryStr = useQuery();
     const selectValue = queryStr.get('q');
     const selectedId = queryStr.get('id');
-    const selectedOrgId = queryStr.get('gid');
+    const selectedEntityType = queryStr.get('qt');
 
     useEffect(() => {
         const exampleWrapper = document.getElementById('examples-words');
@@ -146,13 +149,12 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
                 setShowExample(false);
             }
         });
-        setScreenWidth(window.screen.width);
         selectedId &&
             selectValue &&
             setQueryValue({
                 entityId: selectedId,
                 entityName: selectValue,
-                orgId: selectedOrgId || ''
+                entityType: selectedEntityType || ''
             });
         refSelect && refSelect.current && refSelect.current.focus();
         inputSearchHandle(selectValue);
@@ -179,17 +181,18 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
         let res: any;
 
         props.history.push(
-            `/graph?q=${queryValue.entityName}&id=${queryValue.entityId}&type=${activeGraph}&gid=${queryValue.orgId}`
+            `/graph?q=${queryValue.entityName}&id=${queryValue.entityId}&type=${activeGraph}&qt=${queryValue.entityType}`
         );
-        if (!queryValue.orgId) {
-            message.warn('当前版本仅支持搜索专家，换一个专家试试吧！');
-            return;
-        }
+
+        const params = {
+            entityId: queryValue.entityId,
+            entityName: queryValue.entityName
+        };
         try {
-            if (queryValue.orgId) {
+            if (queryValue.entityType === 'EXPERT') {
                 // 专家图谱
                 if (activeGraph === 0) {
-                    res = await expertApi.getExpertGraph(queryValue);
+                    res = await expertApi.getExpertGraph(params);
                 } else {
                     // 资源图谱
                 }
@@ -197,7 +200,7 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
                 // 学科词图谱
                 if (activeGraph === 0) {
                     // 关系图谱
-                    res = await subjectApi.getSubjectGraph(queryValue);
+                    res = await subjectApi.getSubjectGraph(params);
                 } else {
                     // 资源图谱
                 }
@@ -250,11 +253,7 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
     // 选中（学科词/专家）后触发的查询事件
     const selectSuggestWordHandle = (value: any) => {
         const params: any = JSON.parse(value);
-        console.log(params);
-        if (!params.orgId) {
-            message.warn('当前版本仅支持搜索专家，换一个专家试试吧！');
-            return;
-        }
+
         setQueryValue(params);
     };
 
@@ -274,13 +273,10 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
         const params = {
             entityId: item.entityId,
             entityName: item.entityName,
-            orgId: item.orgId
+            entityType: item.entityType
         };
         setShowExample(false);
-        if (!params.orgId) {
-            message.warn('当前版本仅支持搜索专家，换一个专家试试吧！');
-            return;
-        }
+
         setQueryValue(params);
     };
 
@@ -292,15 +288,12 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
 
     // 切换图谱类型
     const toggleGraphHandle = () => {
-        if (activeGraph === 0) {
-            message.info('当前版本仅支持搜索关系图谱');
-            return;
-        }
-        // console.log(activeGraph);
-
         setActiveGraph(activeGraph === 0 ? 1 : 0);
     };
-
+    const onEntityClick = (id: string) => {
+        console.log(id);
+        setCurrentDrawer(id);
+    };
     // 词云mock数据
     const wordCloudList: ICommonProps[] = [
         {
@@ -425,84 +418,22 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
                     </ContainerItem>
                 </div>
                 <div className={css['main-wrapper']}>
-                    {/* 搜索模块 start */}
-                    <div className={css['search-wrapper']}>
-                        <Select
-                            ref={refSelect}
-                            showSearch
-                            autoFocus={true}
-                            value={queryValue.entityName}
-                            placeholder="请输入搜索词并在下拉菜单选择知识图谱"
-                            notFoundContent={
-                                suggestInfo.loading ? (
-                                    <Spin size="small" />
-                                ) : (
-                                    '无关联知识图谱，请重新输入'
-                                )
-                            }
-                            filterOption={false}
-                            onSearch={(value) => fetchSuggest(value)}
-                            onChange={(value: any) => selectSuggestWordHandle(value)}
-                            // style={{ width: 480, height: 48 }}
-                            style={{ width: inputWidth, height: inputHeight }}
-                            showArrow={false}
-                            defaultActiveFirstOption={true}
-                        >
-                            {suggestInfo.list.length &&
-                                suggestInfo.list.map((item: any, index) => (
-                                    <Option
-                                        key={item.entityId}
-                                        value={JSON.stringify({
-                                            entityName: item.entityName,
-                                            entityId: item.entityId,
-                                            orgId: item.orgId ? item.orgId : ''
-                                        })}
-                                    >
-                                        {item.entityName + (item.orgName ? ' ' + item.orgName : '')}
-                                    </Option>
-                                ))}
-                        </Select>
-                        <span className={css['example-btn']} onClick={showExampleHandle}>
-                            示例
-                            <Icon key="search_icon" className={css['search-icon']} type="search" />
-                        </span>
-                        {/* 展示所有示例 */}
-                        <div
-                            id="examples-words"
-                            className={[
-                                `${css['examples-wrapper']}`,
-                                `${showExample ? css['show-example'] : ''}`
-                            ].join(' ')}
-                        >
-                            <section className={css['expert-words']}>
-                                {exampleList.map((item, index) => {
-                                    return (
-                                        <Button
-                                            className={
-                                                item.entityId === activeExampleId
-                                                    ? css['active']
-                                                    : ''
-                                            }
-                                            key={item.entityName + '_' + index}
-                                            onClick={(e) => exampleClickHandle(item, e)}
-                                        >
-                                            {item.entityName}
-                                        </Button>
-                                    );
-                                })}
-                            </section>
-                            <div className={css['example-footer']}>
-                                <Button type="primary" onClick={examplePageHandle}>
-                                    换一组
-                                </Button>
-                                <Button id="close-btn" onClick={() => setShowExample(false)}>
-                                    关闭
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                    {/* 搜索模块 end */}
-
+                    <Search
+                        width={inputWidth}
+                        height={inputHeight}
+                        value={queryValue.entityName}
+                        showExample={showExample}
+                        activeExampleId={activeExampleId}
+                        exampleList={exampleList}
+                        refSelect={refSelect}
+                        suggestInfo={suggestInfo}
+                        showExampleHandle={showExampleHandle}
+                        exampleClickHandle={exampleClickHandle}
+                        examplePageHandle={examplePageHandle}
+                        setShowExample={setShowExample}
+                        fetchSuggest={fetchSuggest}
+                        selectSuggestWordHandle={selectSuggestWordHandle}
+                    />
                     <div className={css['toggle-btn-group']}>
                         <Radio.Group value={activeGraph} onChange={toggleGraphHandle}>
                             <Radio.Button value={0}>关系图谱</Radio.Button>
@@ -526,6 +457,8 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
                             相关的{activeGraph ? '资源' : '关系'}图谱，换一个词试试吧！
                         </p>
                     )}
+                    {/* <NodeLayer />
+                    <RelationLayer /> */}
                 </div>
                 <div
                     className={[`${css['aside-right-wrapper']}`, `${css['aside-wrapper']}`].join(
@@ -534,7 +467,7 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
                 >
                     <div className={css['statistics-wrapper']}>
                         <span>文献134xx篇</span>
-                        <span>科研项目134xx个</span>
+                        <span onClick={() => onEntityClick('1')}>科研项目134xx个</span>
                     </div>
                     {/* 专家履历 */}
                     <ExpertResume />
@@ -600,6 +533,16 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
                     </ContainerItem>
                 </div>
             </div>
+            <Drawer
+                width={380}
+                placement="right"
+                closable={false}
+                onClose={() => setCurrentDrawer('')}
+                visible={!!currentDrawer}
+                bodyStyle={{ padding: 0 }}
+            >
+                <RelationLayer />
+            </Drawer>
         </div>
     );
 };

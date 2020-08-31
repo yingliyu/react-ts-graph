@@ -7,6 +7,7 @@
         padding-left: 20px;
         background: #fff;
         box-sizing: border-box;
+        font-size: 18px;
         margin: 0;
     }
     .container {
@@ -29,87 +30,7 @@
                     color: #1890ff;
                 }
             }
-            .search-wrapper {
-                position: relative;
-                :global .ant-select-selection--single,
-                :global .ant-select-selection__rendered {
-                    height: 48px;
-                    line-height: 48px;
-                    box-sizing: border-box;
-                }
 
-                .example-btn {
-                    color: #1890ff;
-                    text-decoration: underline;
-                    padding-left: 10px;
-                    cursor: pointer;
-                    position: relative;
-                    .search-icon {
-                        position: absolute;
-                        left: -35px;
-                        top: -3px;
-                        font-size: 26px;
-                        color: #d1d1d1;
-                    }
-                }
-                .suggests-wrapper {
-                    width: 480px;
-                    position: relative;
-                    left: 320px;
-                    top: 10px;
-                    background: #fff;
-                }
-                .examples-wrapper {
-                    width: 500px;
-                    position: absolute;
-                    right: 285px;
-                    top: 65px;
-                    border-radius: 5px;
-                    padding: 10px;
-                    text-align: left;
-                    box-sizing: border-box;
-                    display: none;
-                    z-index: 3;
-                    background-color: #fff;
-                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-                    &:before {
-                        content: '';
-                        width: 0px;
-                        height: 0px;
-                        border: 8px solid transparent;
-                        border-bottom: 8px solid #fff;
-                        position: absolute;
-                        right: 20px;
-                        top: -15px;
-                    }
-                    section {
-                        :global .ant-btn {
-                            margin-bottom: 10px;
-                        }
-                        .active {
-                            color: #1890ff;
-                            border-color: #1890ff;
-                        }
-                        &:last-child {
-                            padding-bottom: 15px;
-                        }
-                    }
-                    :global .ant-btn {
-                        margin-right: 10px;
-                    }
-                    .example-footer {
-                        width: 100%;
-                        bottom: 2px;
-                        right: 0;
-                        text-align: right;
-                        padding-top: 7px;
-                        border-top: 1px solid #eee;
-                    }
-                }
-                .show-example {
-                    display: block;
-                }
-            }
             .toggle-btn-group {
                 position: absolute;
                 text-align: left;
@@ -166,29 +87,6 @@
                 .no-graph-desc {
                     font-size: 14px;
                 }
-                .search-wrapper {
-                    position: relative;
-                    :global .ant-select-selection--single,
-                    :global .ant-select-selection__rendered {
-                        width: 420px;
-                        height: 40px;
-                        line-height: 40px;
-                        box-sizing: border-box;
-                    }
-                    .example-btn {
-                        font-size: 14px;
-                        .search-icon {
-                            font-size: 22px;
-                        }
-                    }
-                    .examples-wrapper {
-                        right: 124px;
-                        top: 48px;
-                        :global .ant-btn {
-                            font-size: 12px;
-                        }
-                    }
-                }
                 .toggle-btn-group {
                     :global .ant-radio-group {
                         font-size: 12px;
@@ -234,28 +132,6 @@
                 min-width: 716px;
                 .no-graph-desc {
                     font-size: 12px;
-                }
-                .search-wrapper {
-                    position: relative;
-                    :global .ant-select-selection--single,
-                    :global .ant-select-selection__rendered {
-                        width: 380px;
-                        height: 35px;
-                        line-height: 35px;
-                    }
-                    .example-btn {
-                        font-size: 14px;
-                        .search-icon {
-                            font-size: 22px;
-                        }
-                    }
-                    .examples-wrapper {
-                        right: 124px;
-                        top: 48px;
-                        :global .ant-btn {
-                            font-size: 12px;
-                        }
-                    }
                 }
                 .toggle-btn-group {
                     :global .ant-radio-group {
