@@ -23,8 +23,6 @@ interface ISearch {
     selectSuggestWordHandle: any;
 }
 export default function Search(props: ISearch) {
-    console.log(props);
-
     const {
         width,
         height,

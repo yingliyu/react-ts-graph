@@ -534,9 +534,9 @@ const GraphPage: React.FC<IGraphProps> = (props) => {
                 </div>
             </div>
             <Drawer
+                className={css['layer-drawer']}
                 width={380}
                 placement="right"
-                closable={false}
                 onClose={() => setCurrentDrawer('')}
                 visible={!!currentDrawer}
                 bodyStyle={{ padding: 0 }}

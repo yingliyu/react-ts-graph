@@ -22,9 +22,9 @@ export default function RelationLayer() {
                     <Tag color="#2079ff">论文合作</Tag>
                     <Tag color="#2079ff">专利合作</Tag>
                 </div>
-                <small onClick={closeLayerHandle}>
+                {/* <small onClick={closeLayerHandle}>
                     <Icon type="close-circle" />
-                </small>
+                </small> */}
             </div>
             <div className={css['layer-header']}>
                 <h5>专家 - 机构名称</h5>
